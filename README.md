@@ -4,8 +4,11 @@ This repository contains computational resources for the Statistical Physics cou
 
 Codes in Julia: https://github.com/cossio/PHY433.jl.
 
-- Simulations of the 2D Ising model. Source code (in Julia): https://github.com/cossio/IsingModels.jl. 
+- Simulations of the 2D Ising model, with Metropolis and Wolff algorithms: https://github.com/cossio/IsingModels.jl. 
+- Conserved order-parameter Ising model with the Kawasaki algorithm: https://github.com/cossio/PHY433.jl/blob/main/pluto/COP.jl. This is a Pluto notebook.
 
 # Setting up Julia
 
 The recommended way to install Julia is to use the Juliaup installer. See https://julialang.org/install/.
+
+We also use Pluto notebooks, which are a Julia package that allows you to create interactive notebooks. To install Pluto, see https://plutojl.org/#install.
