@@ -2,7 +2,7 @@
 
 This repository contains computational resources for the Statistical Physics course at École Polytechnique, imparted by Rémi Monasson. Some are external links to resources found on the web illustrating concepts covered in the course, while others are original codes written by authors of this repository. The original codes are written in Julia (https://julialang.org).
 
-For any questions or suggestions, please contact the author of this repository: [Jorge FERNANDEZ-DE-COSSIO-DIAZ](https://sites.google.com/view/jorgefdcd). Also feel free to open an issue in the repository or a send a pull request if you have any suggestions or improvements.
+For any questions or suggestions, please contact the author of this repository: [Jorge FERNANDEZ-DE-COSSIO-DIAZ](https://sites.google.com/view/jorgefdcd). Also feel free to open an issue in the repository or a send a pull request if you have any suggestions for improvements.
 
 Codes in Julia:
 
@@ -19,9 +19,18 @@ On Unix-type system open a terminal and run the following command:
 curl -fsSL https://install.julialang.org | sh
 ```
 
-and follow the instructions.
+and follow the instructions (you can accept the default settings).
+
+Now to open Julia, you can run the following command in the terminal:
+
+```bash
+julia
+```
+
+This will open the Julia REPL (Read-Eval-Print Loop), which is an interactive shell for Julia. You can run Julia commands directly in the REPL. Note that right after installing Julia, you may need to close and reopen the terminal for the `julia` command to be recognized.
 
 We also use [Pluto](https://plutojl.org) notebooks, which are a Julia package that allows you to create interactive notebooks. To install Pluto, open Julia and run the following command:
+
 ```julia
 import Pkg
 Pkg.add("Pluto")
