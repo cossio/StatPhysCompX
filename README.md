@@ -11,14 +11,27 @@ Codes in Julia:
 
 ## Setting up Julia
 
-The recommended way to install Julia is to use the Juliaup installer. 
+The recommended way to install [Julia](https://julialang.org) is to use the Juliaup installer. 
 
-On Unix-type system o pen a terminal and run the following command:
+On Unix-type system open a terminal and run the following command:
 
 ```bash
 curl -fsSL https://install.julialang.org | sh
 ```
 
-and follow the instructions. See also https://julialang.org/install/.
+and follow the instructions.
 
-We also use Pluto notebooks, which are a Julia package that allows you to create interactive notebooks. To install Pluto, see https://plutojl.org/#install.
+We also use [Pluto](https://plutojl.org) notebooks, which are a Julia package that allows you to create interactive notebooks. To install Pluto, open Julia and run the following command:
+```julia
+import Pkg
+Pkg.add("Pluto")
+```
+
+To run a Pluto notebook, open Julia and run the following command:
+
+```julia
+using Pluto
+Pluto.run()
+```
+
+This will open a web browser with the Pluto interface. You can create a new notebook by clicking on the "New notebook" button. You can also open an existing notebook by clicking on the "Open notebook" button and selecting the notebook file.
