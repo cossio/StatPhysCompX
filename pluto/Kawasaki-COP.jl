@@ -27,15 +27,15 @@ $$\sum_i s_i = Nm$$
 
 where $N$ is the total number of sites in the lattice and $-1 \le m \le 1$, the magnetization per site, is now a fixed parameter of the model. The equilibrium Boltzmann probability distribution at temperature $1/\beta$ is given by:
 
-$$P(\mathbf s) = \frac{1}{Z(J,m)} \exp \left(-J\sum_{(ij)}s_i s_j \right) \delta\left( \sum_i s_i; Nm \right)$$
+$$P(\mathbf s) = \frac{1}{Z(J,m)} \exp \left(J\sum_{(ij)}s_i s_j \right) \delta\left( \sum_i s_i; Nm \right)$$
 
 where $\delta(x;y)=1$ if $x=y$ and $\delta(x;y)=0$ otherwise. Configurations $\mathbf s$ that violate the COP constraint have zero probability. Accordingly, the partition function now includes only configurations that satisfy this constraint:
 
-$$Z(J,m) = \sum_{\mathbf s \in \{\pm 1\}^{N}} \exp \left(-J\sum_{(ij)}s_i s_j \right) \delta\left( \sum_i s_i; Nm \right)$$
+$$Z(J,m) = \sum_{\mathbf s \in \{\pm 1\}^{N}} \exp \left(J\sum_{(ij)}s_i s_j \right) \delta\left( \sum_i s_i; Nm \right)$$
 
 Like we saw in the tutorials, a Hamiltonian of this form can be regarded as a model of an alloy, where a site $s_i=-1$ is interpreted as being occupied by atoms of one type, while $s_i=+1$ corresponds to the same site being occupied by an atom of a different type. The constraint $\sum_i s_i = \text{const.}$ then corresponds to the fact that the total numbers of atoms of each type is conserved.
 
-If we sum over all allowed values of $m$, note that $Z(J) = \sum_m Z(J,m)$ gives back the partition function of a standard Ising model. The ratio $Z(J,m)/Z(J)$ then gives the probability of observing magnetization $m$ in the ordinary Ising model.
+Another interpretation of the COP Ising model, is that it allows us to study very rare fluctuations of the magnetization in the standard Ising model. More precisely, if we sum over all allowed values of $m$, note that $Z(J) = \sum_m Z(J,m)$ gives back the partition function of a standard Ising model. The ratio $Z(J,m)/Z(J)$ then gives the probability of observing magnetization $m$ in the ordinary Ising model. As we know, in the 2D Ising model a phase transition occurs below a critical temperature, where $m$ concentrates around a typical non-zero value $m^*$. At low temperatures, values of $m$ that differ from $m^{*}$ become extremely rare. However, one could still be interested in understanding what configurations could realize these (extremely unlikely) large fluctuations of $m$. The COP Ising model allows us to study this question. As we will see, configurations corresponding to atypical values of $m$ are characterized by *phase separation*, where domains appear with magnetizations $\pm m^*$. The domain sizes adjust so that globally the desired magnetization $m$ is obtained.
 
 In this notebook we will simulate the COP Ising model using the **Kawasaki algorithm**. 
 
@@ -43,7 +43,7 @@ We will consider a periodic 2-dimensional lattice of size $N = L\times L$.
 
 ## References
 
-- Newman, M.E.J. et al. (1999) Monte Carlo Methods in Statistical Physics. Oxford University Press.
+- We will follow Chapter 5 of the book Newman, M.E.J. et al. (1999) Monte Carlo Methods in Statistical Physics. Oxford University Press.
 """
 
 # ╔═╡ fd492bd6-2c43-11f0-3362-8f17eec1b17b
@@ -54,6 +54,15 @@ import PlutoUI
 
 # ╔═╡ 4208fac7-d6f1-4daa-9473-c0ea0339ed0f
 PlutoUI.TableOfContents()
+
+# ╔═╡ 0dc40c69-c14b-4a45-9bfe-5e50b205927e
+md"""
+The Kawasaki algorithm is a Monte-Carlo routine to simulate the COP Ising model. In the standard Metropolis algorithm to simulate the Ising model, a flip of a random spin is proposed each time step, which is then accepted or not according to Metropolis rule. However, by flipping just a single spin it is impossible to conserve the global magnetization of the lattice.
+
+Instead, we can propose to flip several spins at once. If the spins flipped originally had a total magnetization of zero, then flipping each of them will not affect the total magnetization of the lattice.
+
+The simplest algorithm implementing this idea is the Kawasaki algorithm. We choose a random pair of spins on the lattice. Rather than flipping them, we *exchange* their values. Then we decide whether to accept this move according to the standard Metropolis rule.
+"""
 
 # ╔═╡ 6acc3073-b2ec-4074-9bc3-77c12c02dba9
 function periodic(i::Int, L::Int)
@@ -90,57 +99,9 @@ neighbor_sum_binary(σ::AbstractMatrix{Bool}, i::CartesianIndex{2}) = sum(σ[j] 
 neighbor_sum_spins(σ::AbstractMatrix{Bool}, i::CartesianIndex{2}) = 2 * neighbor_sum_binary(σ, i) - 4
 
 # ╔═╡ 35820e09-1539-4638-a97e-f1cd95360ce2
+# energy cost of swapping spins at sites i0 and i1
 function kawasaki_swap_ΔE(σ::AbstractMatrix{Bool}, i0::CartesianIndex{2}, i1::CartesianIndex{2})
 	return 2 * (σ[i1] - σ[i0]) * (neighbor_sum_spins(σ, i1) - neighbor_sum_spins(σ, i0))
-end
-
-# ╔═╡ c636ae2a-9b5d-4a97-80dd-317767c52775
-function kawasaki!(σ::AbstractArray{Bool,3}, J::Real)
-	L1, L2, nsteps = size(σ)
-	N = L1 * L2
-
-	M = sum(σ[:,:,1])
-
-	if M == N
-		σ .= σ[:,:,1:1]
-		return σ
-	end
-	
-	# keep track of indices of spins that are up and down
-	spins_0 = findall(!, σ[:,:,1])
-	spins_1 = findall(σ[:,:,1])
-	
-	@progress for t = 2:nsteps
-		σ[:,:,t] .= σ[:,:,t - 1]
-		
-		idx0 = rand(eachindex(spins_0))
-		idx1 = rand(eachindex(spins_1))
-
-		i0 = spins_0[idx0]
-		i1 = spins_1[idx1]
-
-		@assert iszero(σ[i0, t - 1])
-		@assert isone(σ[i1, t - 1])
-
-		ΔE = J * kawasaki_swap_ΔE(view(σ, :, :, t - 1), i0, i1)
-
-		if ΔE ≤ 0 || randexp() ≥ ΔE
-			σ[i0, t] = 1
-			σ[i1, t] = 0
-			
-			@assert isone(σ[i0, t])
-			@assert iszero(σ[i1, t])
-
-			spins_0[idx0] = i1
-			spins_1[idx1] = i0
-		end
-
-		@assert sum(σ[:,:,t]) == M
-		@assert sort(spins_0) == findall(!, σ[:,:,t])
-		@assert sort(spins_1) == findall(σ[:,:,t])
-	end
-
-	return σ
 end
 
 # ╔═╡ 6dd0b625-9fdb-4435-9641-08b30ed486e4
@@ -157,57 +118,109 @@ function neighbors_up_right(σ::AbstractMatrix{Bool}, i::CartesianIndex{2})
 end
 
 # ╔═╡ be769062-9d8c-4267-9388-2010b32be7d5
+# compute the total energy of the lattice
 function energy(σ::AbstractMatrix{Bool})
 	return -sum((2σ[i] - 1) * (2σ[j] - 1) for i = CartesianIndices(σ) for j = neighbors_up_right(σ, i))
 end
 
 # ╔═╡ aee1f8f4-dfa0-4ead-9ddc-3dc96bed969d
-function random_lattice(; L::Int, M::Int, T::Int)
-	N = L^2
-	@assert -N ≤ M ≤ N
-	σ = falses(L, L, T)
-	for i = CartesianIndices(σ[:,:,1])[randperm(N)[1:M]]
-		σ[i, 1] = true
+function random_lattice(; L1::Int, L2::Int, M::Int)
+	N = L1 * L2
+	@assert M ∈ 2L2 - N:2:N - 2L2
+	
+	σ = falses(L1, L2)
+	σ[:, 1] .= true # boundary condition
+	@assert sum(2σ[:,:] .- 1) == 2L1 - N
+
+	@assert iseven(M + N)
+	flips_needed = (M + N) ÷ 2 - L1
+	
+	for i = filter(i -> 1 < i[2] < L2, CartesianIndices(σ[:,:]))[randperm(N - 2L1)][1:flips_needed]
+		σ[i] = true
 	end
+	@assert sum(2σ[:,:] .- 1) == M
+	
 	return σ
 end
 
-# ╔═╡ 061bd846-70f7-45ee-827e-b8aee5ab9cac
-sum(random_lattice(; L=100, M=50, T=100)[:,:,1])
+# ╔═╡ 599c7eea-52e2-4363-b5de-986a4a942f0c
+function kawasaki(J::Real; L1::Int, L2::Int, M::Int, steps_between_frames::Int, number_of_frames::Int)
+	σ = random_lattice(; L1, L2, M)
 
-# ╔═╡ 6985a3c0-fde0-442c-b44b-637952933620
-function save_kawasaki_video_makie(filename::String, σ::AbstractArray{Bool,3})
+	# boundary conditions
+	σ[:, 1] .= true
+	σ[:, end] .= false
 
-    L1, L2, nsteps = size(σ)
-    # convert Bool → 0/1 so heatmap sees numeric data
-    data = Float32.(σ)
+	trace = falses(L1, L2, number_of_frames)
+	trace[:, :, 1] .= σ
 
-	time = Makie.Observable(1)
-	current_data = Makie.@lift data[:, :, $time]
+	# keep track of indices of spins that are up and down; remove boundary
+	spins_0 = filter(i -> 1 < i[2] < L2, findall(!, σ[:, :]))
+	spins_1 = filter(i -> 1 < i[2] < L2, findall(σ[:, :]))
 
-    fig = Makie.Figure()
-    ax = Makie.Axis(fig[1,1]; title = "Step 1", aspect = Makie.DataAspect(), width=600, height=600)    
-    hm = Makie.heatmap!(ax, current_data; colormap = [:black, :white], interpolate = false)
-	Makie.resize_to_layout!(fig)
+	@progress for f = 2:number_of_frames
+		for t = 1:steps_between_frames
+			idx0 = rand(eachindex(spins_0))
+			idx1 = rand(eachindex(spins_1))
+	
+			i0 = spins_0[idx0]
+			i1 = spins_1[idx1]
+	
+			ΔE = J * kawasaki_swap_ΔE(σ, i0, i1)
+	
+			if ΔE ≤ 0 || randexp() ≥ ΔE
+				σ[i0] = 1
+				σ[i1] = 0
+	
+				spins_0[idx0] = i1
+				spins_1[idx1] = i0
+			end
+		end
 
-	frame_step = 50
-    @withprogress Makie.record(fig, filename, 1:frame_step:nsteps; framerate = 25) do t
-        time[] = t
-        ax.title = "Step $t / $nsteps"
-		@logprogress t/nsteps
-    end
+		trace[:, :, f] .= σ
+	end
 
-    println("✔️ Saved animation to $filename")
+	return trace
 end
 
-# ╔═╡ eb9a53e5-8daa-4d4e-b9b3-8d59431c4b85
-σ = random_lattice(; L=50, M=round(Int, 50*50 * 0.7), T=1000000); kawasaki!(σ, 2)
+# ╔═╡ fdc07a87-977b-4ee1-9433-c03c156113d8
+values_of_J = [0.1, 0.5, 1, 5]
 
-# ╔═╡ 9eae315a-395c-4e56-b304-f07be3dc88b4
-sizeof(σ) / 1e9
+# ╔═╡ 78a2efe9-79e7-4632-ae0b-2073e040320d
+simulations = map(values_of_J) do J
+	@info "Simulating J=$J"
+	kawasaki(J; L1=100, L2=50, M=0, steps_between_frames=4_000, number_of_frames=25_000)
+end
 
-# ╔═╡ 3824cae0-c7f1-4f06-9e39-3c9bc094b1d9
-save_kawasaki_video_makie("/Users/jfdcd/teaching/2025/PHY433/PHY433.jl/temp/kawasaki.mp4", σ)
+# ╔═╡ 4ce3aed5-6243-431e-ae7f-edd251055094
+let fig = Makie.Figure()
+	@assert length(simulations) == length(values_of_J) == 4 # we will make a 2x2 grid in the video
+	L1, L2, nsteps = size(simulations[1])
+
+	time = Makie.Observable(1)
+	
+	current_data = [Makie.@lift Float16.(sim[:, :, $time]) for sim = simulations]
+
+	for n = 1:4
+		J = values_of_J[n]
+		spins = current_data[n]
+		
+		row, col = fldmod1(n, 2)
+		ax = Makie.Axis(fig[row, col]; title = "J = $J", aspect = Makie.DataAspect(), width=300 * sqrt(L1/L2), height=300 * sqrt(L2/L1))
+		hm = Makie.heatmap!(ax, spins; colormap=[:white, :black], interpolate=false)
+	end
+	
+	Makie.resize_to_layout!(fig)
+
+	filename = "/Users/jfdcd/teaching/2025/StatPhysCompX/temp/kawasaki.mp4"
+	frame_step = 10
+	@withprogress Makie.record(fig, filename, 1:frame_step:nsteps; framerate = 25) do t
+		time[] = t
+		@logprogress t/nsteps
+	end
+
+	println("✔️ Saved animation to $filename")
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1773,7 +1786,8 @@ version = "3.6.0+0"
 # ╠═6d1d030e-f873-4da4-a77b-7cea414892da
 # ╠═5a50fc93-3915-4d58-ad49-f98651e72ae2
 # ╠═4208fac7-d6f1-4daa-9473-c0ea0339ed0f
-# ╠═c636ae2a-9b5d-4a97-80dd-317767c52775
+# ╠═0dc40c69-c14b-4a45-9bfe-5e50b205927e
+# ╠═599c7eea-52e2-4363-b5de-986a4a942f0c
 # ╠═be769062-9d8c-4267-9388-2010b32be7d5
 # ╠═35820e09-1539-4638-a97e-f1cd95360ce2
 # ╠═20bcf8f6-67e1-4ce6-b0f4-01c4a9d79483
@@ -1782,10 +1796,8 @@ version = "3.6.0+0"
 # ╠═14b06b09-9c60-43ae-bdb8-1c22f272ad08
 # ╠═6acc3073-b2ec-4074-9bc3-77c12c02dba9
 # ╠═aee1f8f4-dfa0-4ead-9ddc-3dc96bed969d
-# ╠═061bd846-70f7-45ee-827e-b8aee5ab9cac
-# ╠═6985a3c0-fde0-442c-b44b-637952933620
-# ╠═eb9a53e5-8daa-4d4e-b9b3-8d59431c4b85
-# ╠═9eae315a-395c-4e56-b304-f07be3dc88b4
-# ╠═3824cae0-c7f1-4f06-9e39-3c9bc094b1d9
+# ╠═fdc07a87-977b-4ee1-9433-c03c156113d8
+# ╠═78a2efe9-79e7-4632-ae0b-2073e040320d
+# ╠═4ce3aed5-6243-431e-ae7f-edd251055094
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
