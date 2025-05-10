@@ -46,5 +46,6 @@ This will open a web browser with the Pluto interface. You can create a new note
 
 Codes in Julia:
 
-- Simulations of the 2D Ising model, with Metropolis and Wolff algorithms: https://github.com/cossio/IsingModels.jl. 
-- Conserved order-parameter Ising model with the Kawasaki algorithm: https://github.com/cossio/PHY433.jl/blob/main/pluto/COP.jl. This is a Pluto notebook.
+- Simulations of the 2D Ising model with the Metropolis algorithm
+- More simulations of the 2D Ising model, with the cluster Wolff algorithm: https://github.com/cossio/IsingModels.jl.
+- Conserved order-parameter Ising model with the Kawasaki algorithm: https://github.com/cossio/PHY433.jl/blob/main/pluto/COP.jl.

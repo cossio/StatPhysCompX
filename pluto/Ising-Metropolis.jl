@@ -4,90 +4,25 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ c2c58635-0c3f-406e-9c01-890cf539a85c
+# ╔═╡ d1460590-3dbc-4e84-a970-d79062d4a7fc
 using ProgressLogging: @progress, @withprogress, @logprogress
 
-# ╔═╡ 6d1d030e-f873-4da4-a77b-7cea414892da
+# ╔═╡ 4656da65-2a9e-494e-b718-11f371c38919
 using Statistics: mean, cov
 
-# ╔═╡ 5a50fc93-3915-4d58-ad49-f98651e72ae2
+# ╔═╡ 1035a215-de4b-4cf0-b16b-6bc203ac941d
 using Random: randexp, bitrand, randperm
 
-# ╔═╡ 1c74c604-5305-4ff4-bca2-6a1a1f958f46
-md"""
-# Conserved order-parameter Ising model
+# ╔═╡ e300bf92-2dcd-11f0-376c-6f98471ddac5
+import Makie, CairoMakie, PlutoUI
 
-Like the standard Ising model, the conserved order-parameter (COP) Ising model is defined by the Hamiltonian:
-
-$$H = -J\sum_{(ij)}s_i s_j$$
-
-where the sum goes over pairs of neighboring sites in a lattice. However, in the COP we impose the constraint that the global magnetization is conserved:
-
-$$\sum_i s_i = Nm$$
-
-where $N$ is the total number of sites in the lattice and $-1 \le m \le 1$, the magnetization per site, is now a fixed parameter of the model. The equilibrium Boltzmann probability distribution at temperature $1/\beta$ is given by:
-
-$$P(\mathbf s) = \frac{1}{Z(J,m)} \exp \left(J\sum_{(ij)}s_i s_j \right) \delta\left( \sum_i s_i; Nm \right)$$
-
-where $\delta(x;y)=1$ if $x=y$ and $\delta(x;y)=0$ otherwise. Configurations $\mathbf s$ that violate the COP constraint have zero probability. Accordingly, the partition function now includes only configurations that satisfy this constraint:
-
-$$Z(J,m) = \sum_{\mathbf s \in \{\pm 1\}^{N}} \exp \left(J\sum_{(ij)}s_i s_j \right) \delta\left( \sum_i s_i; Nm \right)$$
-
-Like we saw in the tutorials, a Hamiltonian of this form can be regarded as a model of an alloy, where a site $s_i=-1$ is interpreted as being occupied by atoms of one type, while $s_i=+1$ corresponds to the same site being occupied by an atom of a different type. The constraint $\sum_i s_i = \text{const.}$ then corresponds to the fact that the total numbers of atoms of each type is conserved.
-
-Another interpretation of the COP Ising model, is that it allows us to study very rare fluctuations of the magnetization in the standard Ising model. More precisely, if we sum over all allowed values of $m$, note that $Z(J) = \sum_m Z(J,m)$ gives back the partition function of a standard Ising model. The ratio $Z(J,m)/Z(J)$ then gives the probability of observing magnetization $m$ in the ordinary Ising model. As we know, in the 2D Ising model a phase transition occurs below a critical temperature, where $m$ concentrates around a typical non-zero value $m^*$. At low temperatures, values of $m$ that differ from $m^{*}$ become extremely rare. However, one could still be interested in understanding what configurations could realize these (extremely unlikely) large fluctuations of $m$. The COP Ising model allows us to study this question. As we will see, configurations corresponding to atypical values of $m$ are characterized by *phase separation*, where domains appear with magnetizations $\pm m^*$. The domain sizes adjust so that globally the desired magnetization $m$ is obtained.
-
-In this notebook we will simulate the COP Ising model using the **Kawasaki algorithm**. 
-
-We will consider a periodic 2-dimensional lattice of size $N = L\times L$.
-
-## References
-
-- We will follow Chapter 5 of the book Newman, M.E.J. et al. (1999) Monte Carlo Methods in Statistical Physics. Oxford University Press.
-"""
-
-# ╔═╡ fd492bd6-2c43-11f0-3362-8f17eec1b17b
-import Makie, CairoMakie
-
-# ╔═╡ 759dac65-7ad7-48d9-b073-a9b731d0d38b
-import PlutoUI
-
-# ╔═╡ 4208fac7-d6f1-4daa-9473-c0ea0339ed0f
+# ╔═╡ 8254bc26-e6c0-484e-aa46-0a29199cbafd
 PlutoUI.TableOfContents()
 
-# ╔═╡ 0dc40c69-c14b-4a45-9bfe-5e50b205927e
-md"""
-The Kawasaki algorithm is a Monte-Carlo routine to simulate the COP Ising model. In the standard Metropolis algorithm to simulate the Ising model, a flip of a random spin is proposed each time step, which is then accepted or not according to Metropolis rule. However, by flipping just a single spin it is impossible to conserve the global magnetization of the lattice.
+# ╔═╡ eabd8266-f124-4fd0-9b06-d73a80fab40d
+magnetization(σ::AbstractMatrix{Bool}) = 2sum(σ) - length(σ)
 
-Instead, we can propose to flip several spins at once. If the spins flipped originally had a total magnetization of zero, then flipping each of them will not affect the total magnetization of the lattice.
-
-The simplest algorithm implementing this idea is the Kawasaki algorithm. We choose a random pair of spins on the lattice. Rather than flipping them, we *exchange* their values. Then we decide whether to accept this move according to the standard Metropolis rule.
-"""
-
-# ╔═╡ aee1f8f4-dfa0-4ead-9ddc-3dc96bed969d
-# Initialize a lattice with a random configuration with a given total magnetization 'M'.
-# Note that we use bits instead of integers to represent the spins to save memory.
-# To convert between a bit (0,1) to a spin (+/- 1), we use the formula s = 2σ - 1.
-function random_lattice(; L1::Int, L2::Int, M::Int)
-	N = L1 * L2
-	@assert M ∈ 2L2 - N:2:N - 2L2
-	
-	σ = falses(L1, L2)
-	σ[:, 1] .= true # boundary condition
-	
-	@assert sum(2σ[:,:] .- 1) == 2L1 - N
-	@assert iseven(M + N)
-	flips_needed = (M + N) ÷ 2 - L1
-	
-	for i = filter(i -> 1 < i[2] < L2, CartesianIndices(σ[:,:]))[randperm(N - 2L1)][1:flips_needed]
-		σ[i] = true
-	end
-	@assert sum(2σ[:,:] .- 1) == M
-	
-	return σ
-end
-
-# ╔═╡ 6acc3073-b2ec-4074-9bc3-77c12c02dba9
+# ╔═╡ fe87aa9b-4485-46d1-bda2-34bafd307fd3
 function periodic(i::Int, L::Int)
     @assert 0 ≤ i ≤ L + 1
     if i < 1
@@ -99,7 +34,21 @@ function periodic(i::Int, L::Int)
     end
 end
 
-# ╔═╡ 20bcf8f6-67e1-4ce6-b0f4-01c4a9d79483
+# ╔═╡ bff3af9b-7a7c-465d-b49c-ac2592d85516
+# list of neighboring spins, up-right only
+function neighbors_up_right(σ::AbstractMatrix{Bool}, i::CartesianIndex{2})
+	@boundscheck @assert i ∈ CartesianIndices(σ)
+	L1, L2 = size(σ)
+	@assert L1 ≥ 3 && L2 ≥ 3
+	n2 = CartesianIndex(i[1], periodic(i[2] + 1, L2))
+	n4 = CartesianIndex(periodic(i[1] + 1, L1), i[2])
+	return (n2, n4)
+end
+
+# ╔═╡ 50060655-f371-4fd2-9e80-b9524acee9bd
+energy(σ::AbstractMatrix{Bool}) = -sum((2σ[i] - 1) * (2σ[j] - 1) for i = CartesianIndices(σ) for j = neighbors_up_right(σ, i))
+
+# ╔═╡ f85c81b0-6c0d-4661-9301-82f15c625663
 # list of neighboring spins
 function neighbors(σ::AbstractMatrix{Bool}, i::CartesianIndex{2})
 	@boundscheck @assert i ∈ CartesianIndices(σ)
@@ -112,94 +61,55 @@ function neighbors(σ::AbstractMatrix{Bool}, i::CartesianIndex{2})
 	return (n1, n2, n3, n4)
 end
 
-# ╔═╡ f81c5538-7f0d-4672-a69d-53c0e2dc3601
+# ╔═╡ 90d7c28e-b68d-4423-a3a8-f6927ff4ede2
 # sums across the neighboring spins
 neighbor_sum_spins(σ::AbstractMatrix{Bool}, i::CartesianIndex{2}) = 2 * sum(σ[j] for j = neighbors(σ, i)) - 4
 
-# ╔═╡ 35820e09-1539-4638-a97e-f1cd95360ce2
-# energy cost of swapping spins at sites i0 and i1
-function kawasaki_swap_ΔE(σ::AbstractMatrix{Bool}, i0::CartesianIndex{2}, i1::CartesianIndex{2})
-	return 2 * (σ[i1] - σ[i0]) * (neighbor_sum_spins(σ, i1) - neighbor_sum_spins(σ, i0))
-end
-
-# ╔═╡ 599c7eea-52e2-4363-b5de-986a4a942f0c
-function kawasaki(J::Real; L1::Int, L2::Int, M::Int, steps_between_frames::Int, number_of_frames::Int)
-	σ = random_lattice(; L1, L2, M)
-
-	# boundary conditions
-	σ[:, 1] .= true
-	σ[:, end] .= false
-
-	trace = falses(L1, L2, number_of_frames)
+# ╔═╡ 550a5cbc-3274-4070-8ba0-f886d3ca063b
+function metropolis(J::Real; L::Int, steps_between_frames::Int, number_of_frames::Int)
+	σ = bitrand(L, L)
+	trace = falses(L, L, number_of_frames)
 	trace[:, :, 1] .= σ
-
-	# keep track of indices of spins that are up and down; remove boundary
-	spins_0 = filter(i -> 1 < i[2] < L2, findall(!, σ[:, :]))
-	spins_1 = filter(i -> 1 < i[2] < L2, findall(σ[:, :]))
-
 	@progress for f = 2:number_of_frames
-		for t = 1:steps_between_frames
-			idx0 = rand(eachindex(spins_0))
-			idx1 = rand(eachindex(spins_1))
-	
-			i0 = spins_0[idx0]
-			i1 = spins_1[idx1]
-	
-			ΔE = J * kawasaki_swap_ΔE(σ, i0, i1)
-	
-			if ΔE ≤ 0 || randexp() ≥ ΔE
-				σ[i0] = 1
-				σ[i1] = 0
-	
-				spins_0[idx0] = i1
-				spins_1[idx1] = i0
-			end
-		end
+	for t = 1:steps_between_frames
+		i = rand(CartesianIndices(σ))
 
-		trace[:, :, f] .= σ
+		ΔM = 2 - 4σ[i]
+		ΔE = -ΔM * neighbor_sum_spins(σ, i) * J
+
+		if ΔE ≤ 0 || randexp() ≥ ΔE
+			σ[i] = !σ[i]
+		end
 	end
 
-	return trace
+	trace[:, :, f] .= σ
 end
 
-# ╔═╡ 6dd0b625-9fdb-4435-9641-08b30ed486e4
-# list of neighboring spins, up-right only
-function neighbors_up_right(σ::AbstractMatrix{Bool}, i::CartesianIndex{2})
-	@boundscheck @assert i ∈ CartesianIndices(σ)
-	L1, L2 = size(σ)
-	@assert L1 ≥ 3 && L2 ≥ 3
-	
-	n2 = CartesianIndex(i[1], periodic(i[2] + 1, L2))
-	n4 = CartesianIndex(periodic(i[1] + 1, L1), i[2])
+return trace
 
-	return (n2, n4)
 end
 
-# ╔═╡ be769062-9d8c-4267-9388-2010b32be7d5
-# compute the total energy of the lattice
-energy(σ::AbstractMatrix{Bool}) = -sum((2σ[i] - 1) * (2σ[j] - 1) for i = CartesianIndices(σ) for j = neighbors_up_right(σ, i))
+# ╔═╡ e0619df2-956b-448a-ba21-1d1be2700848
+values_of_J = [0.3, 0.4, 0.44, 0.5]
 
-# ╔═╡ fdc07a87-977b-4ee1-9433-c03c156113d8
-values_of_J = [0.1, 0.5, 1, 5]
-
-# ╔═╡ 78a2efe9-79e7-4632-ae0b-2073e040320d
+# ╔═╡ f387efb2-5490-47ef-8201-d692e892b8b4
 simulations = map(values_of_J) do J
 	@info "Simulating J=$J"
-	kawasaki(J; L1=100, L2=50, M=0, steps_between_frames=4_000, number_of_frames=25_000)
+	metropolis(J; L=50, steps_between_frames=4_000, number_of_frames=100_000)
 end
 
-# ╔═╡ 34556218-4083-4798-b6ae-971716f53fad
+# ╔═╡ bcadada9-9bf3-42cc-9ce8-b1692abfe98a
 # Show some typical snapshots
 let fig = Makie.Figure()
 	@assert length(simulations) == length(values_of_J) == 4 # we will make a 2x2 grid
-	L1, L2, nsteps = size(simulations[1])
+	nsteps = size(simulations[1], 3)
 	
 	for n = 1:4
 		J = values_of_J[n]
 		spins = simulations[n][:, :, 10_000]
 		
 		row, col = fldmod1(n, 2)
-		ax = Makie.Axis(fig[row, col]; title = "J = $J", aspect = Makie.DataAspect(), width=300 * sqrt(L1/L2), height=300 * sqrt(L2/L1))
+		ax = Makie.Axis(fig[row, col]; title = "J = $J", aspect = Makie.DataAspect(), width=300, height=300)
 		hm = Makie.heatmap!(ax, spins; colormap=[:white, :black], interpolate=false)
 	end
 	
@@ -207,37 +117,22 @@ let fig = Makie.Figure()
 	fig
 end
 
-# ╔═╡ 4ce3aed5-6243-431e-ae7f-edd251055094
-# Save a video
+# ╔═╡ 18034bbf-cb99-485d-b2e3-14cd31c79a60
+# Plot the magnetization in time
 let fig = Makie.Figure()
-	@assert length(simulations) == length(values_of_J) == 4 # we will make a 2x2 grid in the video
-	L1, L2, nsteps = size(simulations[1])
-
-	time = Makie.Observable(1)
+	@assert length(simulations) == length(values_of_J) == 4 # we will make a 2x2 grid
+	nsteps = size(simulations[1], 3)
 	
-	current_data = [Makie.@lift Float16.(sim[:, :, $time]) for sim = simulations]
-
 	for n = 1:4
 		J = values_of_J[n]
-		spins = current_data[n]
-		
 		row, col = fldmod1(n, 2)
-		ax = Makie.Axis(fig[row, col]; title = "J = $J", aspect = Makie.DataAspect(), width=300 * sqrt(L1/L2), height=300 * sqrt(L2/L1))
-		hm = Makie.heatmap!(ax, spins; colormap=[:white, :black], interpolate=false)
+		ax = Makie.Axis(fig[row, col]; title = "J = $J", width=700, height=250, xlabel="time", ylabel="average magnetization")
+		Makie.lines!(ax, axes(simulations[n], 3), dropdims(mean(2simulations[n] .- 1; dims=(1,2)); dims=(1,2)))
+		Makie.ylims!(ax, -1, 1)
 	end
 	
 	Makie.resize_to_layout!(fig)
-
-	# Specifiy a path to desired destination of the video
-	filename = "/Users/jfdcd/teaching/2025/StatPhysCompX/temp/kawasaki.mp4"
-		
-	frame_step = 10
-	@withprogress Makie.record(fig, filename, 1:frame_step:nsteps; framerate = 25) do t
-		time[] = t
-		@logprogress t/nsteps
-	end
-
-	println("✔️ Saved animation to $filename")
+	fig
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -253,7 +148,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 [compat]
 CairoMakie = "~0.13.4"
 Makie = "~0.22.4"
-PlutoUI = "~0.7.23"
+PlutoUI = "~0.7.62"
 ProgressLogging = "~0.1.4"
 """
 
@@ -263,7 +158,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "359946a2aac87bb27e09a39bd374b0e62b5c3ab0"
+project_hash = "47fc60137d28471410db7679004618ba37f26f8d"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -414,19 +309,15 @@ version = "3.29.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "67e11ee83a43eb71ddc950302c53bf33f0690dfe"
+git-tree-sha1 = "b10d0b65641d57b8b4d5e234446582de5047050d"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.12.1"
-weakdeps = ["StyledStrings"]
-
-    [deps.ColorTypes.extensions]
-    StyledStringsExt = "StyledStrings"
+version = "0.11.5"
 
 [[deps.ColorVectorSpace]]
 deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "Requires", "Statistics", "TensorCore"]
-git-tree-sha1 = "8b3b6f87ce8f65a2b4f857528fd8d70086cd72b1"
+git-tree-sha1 = "a1f44953f2382ebb937d60dafbe2deea4bd23249"
 uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
-version = "0.11.0"
+version = "0.10.0"
 weakdeps = ["SpecialFunctions"]
 
     [deps.ColorVectorSpace.extensions]
@@ -731,9 +622,9 @@ version = "0.3.28"
 
 [[deps.Hyperscript]]
 deps = ["Test"]
-git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
+git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
 uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.4"
+version = "0.0.5"
 
 [[deps.HypertextLiteral]]
 deps = ["Tricks"]
@@ -1041,6 +932,11 @@ version = "0.3.29"
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 version = "1.11.0"
 
+[[deps.MIMEs]]
+git-tree-sha1 = "c64d943587f7187e751162b3b84445bbbd79f691"
+uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
+version = "1.1.0"
+
 [[deps.MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "oneTBB_jll"]
 git-tree-sha1 = "5de60bc6cb3899cd318d80d627560fae2e2d99ae"
@@ -1261,10 +1157,10 @@ uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
 version = "1.4.3"
 
 [[deps.PlutoUI]]
-deps = ["AbstractPlutoDingetjes", "Base64", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
-git-tree-sha1 = "5152abbdab6488d5eec6a01029ca6697dff4ec8f"
+deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
+git-tree-sha1 = "d3de2694b52a01ce61a036f18ea9c0f61c4a9230"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.23"
+version = "0.7.62"
 
 [[deps.PolygonOps]]
 git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
@@ -1611,6 +1507,11 @@ git-tree-sha1 = "4d4ed7f294cda19382ff7de4c137d24d16adc89b"
 uuid = "981d1d27-644d-49a2-9326-4793e63143c3"
 version = "0.1.0"
 
+[[deps.URIs]]
+git-tree-sha1 = "cbbebadbcc76c5ca1cc4b4f3b0614b3e603b5000"
+uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
+version = "1.5.2"
+
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
@@ -1797,25 +1698,21 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─1c74c604-5305-4ff4-bca2-6a1a1f958f46
-# ╠═fd492bd6-2c43-11f0-3362-8f17eec1b17b
-# ╠═759dac65-7ad7-48d9-b073-a9b731d0d38b
-# ╠═c2c58635-0c3f-406e-9c01-890cf539a85c
-# ╠═6d1d030e-f873-4da4-a77b-7cea414892da
-# ╠═5a50fc93-3915-4d58-ad49-f98651e72ae2
-# ╠═4208fac7-d6f1-4daa-9473-c0ea0339ed0f
-# ╟─0dc40c69-c14b-4a45-9bfe-5e50b205927e
-# ╠═aee1f8f4-dfa0-4ead-9ddc-3dc96bed969d
-# ╠═599c7eea-52e2-4363-b5de-986a4a942f0c
-# ╠═be769062-9d8c-4267-9388-2010b32be7d5
-# ╠═35820e09-1539-4638-a97e-f1cd95360ce2
-# ╠═20bcf8f6-67e1-4ce6-b0f4-01c4a9d79483
-# ╠═6dd0b625-9fdb-4435-9641-08b30ed486e4
-# ╠═f81c5538-7f0d-4672-a69d-53c0e2dc3601
-# ╠═6acc3073-b2ec-4074-9bc3-77c12c02dba9
-# ╠═fdc07a87-977b-4ee1-9433-c03c156113d8
-# ╠═78a2efe9-79e7-4632-ae0b-2073e040320d
-# ╠═34556218-4083-4798-b6ae-971716f53fad
-# ╠═4ce3aed5-6243-431e-ae7f-edd251055094
+# ╠═e300bf92-2dcd-11f0-376c-6f98471ddac5
+# ╠═d1460590-3dbc-4e84-a970-d79062d4a7fc
+# ╠═4656da65-2a9e-494e-b718-11f371c38919
+# ╠═1035a215-de4b-4cf0-b16b-6bc203ac941d
+# ╠═8254bc26-e6c0-484e-aa46-0a29199cbafd
+# ╠═50060655-f371-4fd2-9e80-b9524acee9bd
+# ╠═eabd8266-f124-4fd0-9b06-d73a80fab40d
+# ╠═bff3af9b-7a7c-465d-b49c-ac2592d85516
+# ╠═f85c81b0-6c0d-4661-9301-82f15c625663
+# ╠═fe87aa9b-4485-46d1-bda2-34bafd307fd3
+# ╠═550a5cbc-3274-4070-8ba0-f886d3ca063b
+# ╠═90d7c28e-b68d-4423-a3a8-f6927ff4ede2
+# ╠═e0619df2-956b-448a-ba21-1d1be2700848
+# ╠═f387efb2-5490-47ef-8201-d692e892b8b4
+# ╠═bcadada9-9bf3-42cc-9ce8-b1692abfe98a
+# ╠═18034bbf-cb99-485d-b2e3-14cd31c79a60
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
