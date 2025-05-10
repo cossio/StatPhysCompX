@@ -4,217 +4,49 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ d1460590-3dbc-4e84-a970-d79062d4a7fc
+# ╔═╡ 2772fc7d-85ce-4169-ae43-5125cda3d3c6
 using ProgressLogging: @progress, @withprogress, @logprogress
 
-# ╔═╡ 4656da65-2a9e-494e-b718-11f371c38919
+# ╔═╡ d3f7fcec-662a-4559-8a1b-4ae182ad2353
 using Statistics: mean, cov
 
-# ╔═╡ 1035a215-de4b-4cf0-b16b-6bc203ac941d
+# ╔═╡ c6e6c824-8502-43c9-b722-6a4e00ca08d7
 using Random: randexp, bitrand, randperm
 
-# ╔═╡ e7a1dec5-37bb-4db3-8b8d-b1fbd1b611bc
-md"""# Ising model simulated with the Metropolis algorithm
-
-The 2-dimensional Ising model is defined by the energy function:
-
-```math
-E(\mathbf{\sigma}) = - \sum_{\langle i j \rangle} \sigma_i \sigma_j
-```
-
-where $\langle i j \rangle$ refers to connected pairs of sites in the square grid lattice, and $\sigma_i = \pm 1$ are spins.
-At inverse temperature $\beta$, this defines a Boltzmann probability distribution:
-
-```math
-P(\mathbf{\sigma}) = \frac{1}{Z} \mathrm{e}^{-\beta E (\mathbf{\sigma})}
-```
-
-where
-
-```math
-Z = \sum_{\mathbf{\sigma}} \mathrm{e}^{-\beta E(\mathbf{\sigma})}
-```
-
-is the partition function.
-
-In the two-dimensional grid lattice, we assume we have a $L\times L$ plane grid, where each spin is connected to its four neighbors.
-We assume periodic boundary conditions, so spin `(1,1)` is connected to spins `(1,L)` and `(L,1)`.
-
-In the thermodynamic limit (large `L`), this model suffers a phase transition at the critical inverse temperature $\beta \approx 0.44$, where it acquires a non-zero magnetization. The model was solved analytically by Onsager in 1944, who derived exact expressions for the magnetization, the free energy, the heat capacity, and the internal energy in the thermodynamic limits.
-
-In this package, the system is simulated using the Metropolis algorithm.
-
-## References
-
-- Newman, Mark EJ, and G. T. Barkema. "Monte Carlo Methods in Statistical Physics (1999)." New York: Oxford 475 (1999).
-- Onsager, Lars. "Crystal statistics. I. A two-dimensional model with an order-disorder transition." Physical Review 65.3-4 (1944): 117.
-"""
-
-# ╔═╡ e300bf92-2dcd-11f0-376c-6f98471ddac5
-import Makie, CairoMakie, PlutoUI
-
-# ╔═╡ 8254bc26-e6c0-484e-aa46-0a29199cbafd
-#PlutoUI.TableOfContents()
-
-# ╔═╡ eabd8266-f124-4fd0-9b06-d73a80fab40d
-magnetization(σ::AbstractMatrix{Bool}) = 2sum(σ) - length(σ)
-
-# ╔═╡ fe87aa9b-4485-46d1-bda2-34bafd307fd3
-function periodic(i::Int, L::Int)
-    @assert 0 ≤ i ≤ L + 1
-    if i < 1
-        return L
-    elseif i > L
-        return 1
-    else
-        return i
-    end
-end
-
-# ╔═╡ bff3af9b-7a7c-465d-b49c-ac2592d85516
-# list of neighboring spins, up-right only
-function neighbors_up_right(σ::AbstractMatrix{Bool}, i::CartesianIndex{2})
-	@boundscheck @assert i ∈ CartesianIndices(σ)
-	L1, L2 = size(σ)
-	@assert L1 ≥ 3 && L2 ≥ 3
-	n2 = CartesianIndex(i[1], periodic(i[2] + 1, L2))
-	n4 = CartesianIndex(periodic(i[1] + 1, L1), i[2])
-	return (n2, n4)
-end
-
-# ╔═╡ 50060655-f371-4fd2-9e80-b9524acee9bd
-energy(σ::AbstractMatrix{Bool}) = -sum((2σ[i] - 1) * (2σ[j] - 1) for i = CartesianIndices(σ) for j = neighbors_up_right(σ, i))
-
-# ╔═╡ f85c81b0-6c0d-4661-9301-82f15c625663
-# list of neighboring spins
-function neighbors(σ::AbstractMatrix{Bool}, i::CartesianIndex{2})
-	@boundscheck @assert i ∈ CartesianIndices(σ)
-	L1, L2 = size(σ)
-	@assert L1 ≥ 3 && L2 ≥ 3
-	n1 = CartesianIndex(i[1], periodic(i[2] - 1, L2))
-	n2 = CartesianIndex(i[1], periodic(i[2] + 1, L2))
-	n3 = CartesianIndex(periodic(i[1] - 1, L1), i[2])
-	n4 = CartesianIndex(periodic(i[1] + 1, L1), i[2])
-	return (n1, n2, n3, n4)
-end
-
-# ╔═╡ 90d7c28e-b68d-4423-a3a8-f6927ff4ede2
-# sums across the neighboring spins
-neighbor_sum_spins(σ::AbstractMatrix{Bool}, i::CartesianIndex{2}) = 2 * sum(σ[j] for j = neighbors(σ, i)) - 4
-
-# ╔═╡ 550a5cbc-3274-4070-8ba0-f886d3ca063b
-function metropolis(J::Real; L::Int, steps_between_frames::Int, number_of_frames::Int)
-	σ = bitrand(L, L)
-	trace = falses(L, L, number_of_frames)
-	trace[:, :, 1] .= σ
-	@progress for f = 2:number_of_frames
-	for t = 1:steps_between_frames
-		i = rand(CartesianIndices(σ))
-
-		ΔM = 2 - 4σ[i]
-		ΔE = -ΔM * neighbor_sum_spins(σ, i) * J
-
-		if ΔE ≤ 0 || randexp() ≥ ΔE
-			σ[i] = !σ[i]
-		end
-	end
-
-	trace[:, :, f] .= σ
-end
-
-return trace
-
-end
-
-# ╔═╡ e0619df2-956b-448a-ba21-1d1be2700848
-values_of_J = [0.3, 0.4, 0.44, 0.5]
-
-# ╔═╡ f387efb2-5490-47ef-8201-d692e892b8b4
-simulations = map(values_of_J) do J
-	@info "Simulating J=$J"
-	metropolis(J; L=50, steps_between_frames=4_000, number_of_frames=100_000)
-end
-
-# ╔═╡ bcadada9-9bf3-42cc-9ce8-b1692abfe98a
-# Show some typical snapshots
-let fig = Makie.Figure()
-	@assert length(simulations) == length(values_of_J) == 4 # we will make a 2x2 grid
-	nsteps = size(simulations[1], 3)
-	
-	for n = 1:4
-		J = values_of_J[n]
-		spins = simulations[n][:, :, 10_000]
-		
-		row, col = fldmod1(n, 2)
-		ax = Makie.Axis(fig[row, col]; title = "J = $J", aspect = Makie.DataAspect(), width=300, height=300)
-		hm = Makie.heatmap!(ax, spins; colormap=[:white, :black], interpolate=false)
-	end
-	
-	Makie.resize_to_layout!(fig)
-	fig
-end
-
-# ╔═╡ 18034bbf-cb99-485d-b2e3-14cd31c79a60
-# Plot the magnetization in time
-let fig = Makie.Figure()
-	@assert length(simulations) == length(values_of_J) == 4 # we will make a 2x2 grid
-	nsteps = size(simulations[1], 3)
-	
-	for n = 1:4
-		J = values_of_J[n]
-		row, col = fldmod1(n, 2)
-		ax = Makie.Axis(fig[row, col]; title = "J = $J", width=700, height=250, xlabel="time", ylabel="average magnetization")
-		Makie.lines!(ax, axes(simulations[n], 3), dropdims(mean(2simulations[n] .- 1; dims=(1,2)); dims=(1,2)))
-		Makie.ylims!(ax, -1, 1)
-	end
-	
-	Makie.resize_to_layout!(fig)
-	fig
-end
-
-# ╔═╡ 1c126deb-1040-4653-b2b6-331bd2215540
+# ╔═╡ 0a14c5e6-4a2a-4d18-a11a-81b72774aed2
 md"""
-The probability distribution over configurations of the Ising model we have defined above,
+# Central limit theorem
 
-$$P(\mathbf{\sigma}) = \frac{1}{Z} \mathrm{e}^{-\beta E (\mathbf{\sigma})}$$
+Let $X_1,\dots,X_n$ be $n$ independent and identically distributed real random variables. Let $\mu=\mathbb E X_i$ and $\sigma^2=\mathbb E (X_i-\mu)^2$ denote their common mean and variance. Finally, let
 
-is symmetrical to a change of sign of all the spins:
+$$\overline{X_n} = \frac{1}{n} \sum_{i=1}^{n} X_i$$
 
-$$P(\mathbf \sigma) = P(-\mathbf \sigma)$$
+denote the sample mean.
 
-In particular, under $P(\sigma)$, each individual spin is as likely to be pointing up as it is to be pointing down.
+The Central Limit Theorem (CLT) tells us that the rescaled random variable 
 
-At high temperatures, typical configurations sampled from $P(\sigma)$ are likely to have global magnetization (defined by $\frac{1}{N}\sum_i \sigma_i$) close to zero. However, as the temperature is decreased, we see that the system tends to get stuck for long periods of time into configurations where a global magnetization sign predominates over the opposite sign. In this case, the global magnetization is likely to be different from zero.
+$$\sqrt{n} (\overline{X_n} - \mu)$$
+
+has asymptotically a normal distribution of zero mean and variance $\sigma^{2}$.
 """
 
-# ╔═╡ dc33c1cf-40bd-4281-b7a4-bf14c625da4e
-values_of_J_for_magnetization = [0.3, 0.4, 0.42, 0.43, 0.44, 0.45]
+# ╔═╡ 1bd6bd85-0735-4a52-b7cc-158eaf44c63c
+import Makie, CairoMakie
 
-# ╔═╡ 1d829ba6-d42e-4a8b-84b5-3b88dabd3817
-simulations_for_magnetization = map(values_of_J_for_magnetization) do J
-	@info "Simulating J=$J"
-	metropolis(J; L=36, steps_between_frames=4_000, number_of_frames=200_000)
-end
+# ╔═╡ 05b0b44f-7564-4bad-a6fb-54c5963b5c58
+import PlutoUI
 
-# ╔═╡ 43821996-dfa0-481a-a5ea-23c42d931da2
-# Plot the magnetization in time
-let fig = Makie.Figure()
-	for n = 1:5
-		J = values_of_J_for_magnetization[n]
-		ax = Makie.Axis(fig[n,1]; title = "J = $J", width=700, height=100, xlabel="average magnetization", ylabel="frequency")
-		Makie.hist!(ax, dropdims(mean(2 * simulations_for_magnetization[n] .- 1; dims=(1,2)); dims=(1,2)); bins=-1:0.1:1, normalization=:pdf)
-	end
-	Makie.resize_to_layout!(fig)
-	fig
-end
+# ╔═╡ 72486d01-4eb8-41a9-be3e-380e79600d7f
+import Distributions, Random
 
-# ╔═╡ ffa8b4c4-c3ab-4b50-aca9-36c2b2e07c66
+# ╔═╡ 61381cfb-28f5-4299-9855-9d85f887996b
 
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 ProgressLogging = "33c8b6b6-d38a-422a-b730-caa89a2f386c"
@@ -223,6 +55,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
 CairoMakie = "~0.13.4"
+Distributions = "~0.25.119"
 Makie = "~0.22.4"
 PlutoUI = "~0.7.62"
 ProgressLogging = "~0.1.4"
@@ -234,7 +67,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "47fc60137d28471410db7679004618ba37f26f8d"
+project_hash = "db452b190a2bc71b4c366ba661ea5e7313fdad55"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1774,27 +1607,13 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─e7a1dec5-37bb-4db3-8b8d-b1fbd1b611bc
-# ╠═e300bf92-2dcd-11f0-376c-6f98471ddac5
-# ╠═d1460590-3dbc-4e84-a970-d79062d4a7fc
-# ╠═4656da65-2a9e-494e-b718-11f371c38919
-# ╠═1035a215-de4b-4cf0-b16b-6bc203ac941d
-# ╠═8254bc26-e6c0-484e-aa46-0a29199cbafd
-# ╠═50060655-f371-4fd2-9e80-b9524acee9bd
-# ╠═eabd8266-f124-4fd0-9b06-d73a80fab40d
-# ╠═bff3af9b-7a7c-465d-b49c-ac2592d85516
-# ╠═f85c81b0-6c0d-4661-9301-82f15c625663
-# ╠═fe87aa9b-4485-46d1-bda2-34bafd307fd3
-# ╠═550a5cbc-3274-4070-8ba0-f886d3ca063b
-# ╠═90d7c28e-b68d-4423-a3a8-f6927ff4ede2
-# ╠═e0619df2-956b-448a-ba21-1d1be2700848
-# ╠═f387efb2-5490-47ef-8201-d692e892b8b4
-# ╠═bcadada9-9bf3-42cc-9ce8-b1692abfe98a
-# ╠═18034bbf-cb99-485d-b2e3-14cd31c79a60
-# ╠═1c126deb-1040-4653-b2b6-331bd2215540
-# ╠═dc33c1cf-40bd-4281-b7a4-bf14c625da4e
-# ╠═1d829ba6-d42e-4a8b-84b5-3b88dabd3817
-# ╠═43821996-dfa0-481a-a5ea-23c42d931da2
-# ╠═ffa8b4c4-c3ab-4b50-aca9-36c2b2e07c66
+# ╠═0a14c5e6-4a2a-4d18-a11a-81b72774aed2
+# ╠═1bd6bd85-0735-4a52-b7cc-158eaf44c63c
+# ╠═05b0b44f-7564-4bad-a6fb-54c5963b5c58
+# ╠═72486d01-4eb8-41a9-be3e-380e79600d7f
+# ╠═2772fc7d-85ce-4169-ae43-5125cda3d3c6
+# ╠═d3f7fcec-662a-4559-8a1b-4ae182ad2353
+# ╠═c6e6c824-8502-43c9-b722-6a4e00ca08d7
+# ╠═61381cfb-28f5-4299-9855-9d85f887996b
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
