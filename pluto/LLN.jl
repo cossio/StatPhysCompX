@@ -23,7 +23,7 @@ import PlutoUI
 import Distributions, Random
 
 # ╔═╡ 2af65c17-3f55-44b1-9313-67698f4c606f
-PlutoUI.TableOfContents()
+#PlutoUI.TableOfContents()
 
 # ╔═╡ 0da16ae1-8a0c-4696-8416-52738fd7fe2a
 md"""
