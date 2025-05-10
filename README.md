@@ -46,7 +46,7 @@ This will open a web browser with the Pluto interface. You can create a new note
 
 Pluto notebooks in Julia:
 
-- Law of large numbers: 
+- Law of large numbers: https://cossio.github.io/StatPhysCompX/pluto_html/LLN.html.
 - Simulations of the 2D Ising model with the Metropolis algorithm: https://github.com/cossio/StatPhysCompX/blob/main/pluto/Ising-Metropolis.jl.
 - Conserved order-parameter Ising model with the Kawasaki algorithm: https://github.com/cossio/PHY433.jl/blob/main/pluto/COP.jl.
 
