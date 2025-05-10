@@ -13,11 +13,14 @@ using Statistics: mean, cov
 # ╔═╡ 1035a215-de4b-4cf0-b16b-6bc203ac941d
 using Random: randexp, bitrand, randperm
 
+# ╔═╡ e7a1dec5-37bb-4db3-8b8d-b1fbd1b611bc
+md"# Ising model simulated with the Metropolis algorithm"
+
 # ╔═╡ e300bf92-2dcd-11f0-376c-6f98471ddac5
 import Makie, CairoMakie, PlutoUI
 
 # ╔═╡ 8254bc26-e6c0-484e-aa46-0a29199cbafd
-PlutoUI.TableOfContents()
+#PlutoUI.TableOfContents()
 
 # ╔═╡ eabd8266-f124-4fd0-9b06-d73a80fab40d
 magnetization(σ::AbstractMatrix{Bool}) = 2sum(σ) - length(σ)
@@ -1698,6 +1701,7 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
+# ╠═e7a1dec5-37bb-4db3-8b8d-b1fbd1b611bc
 # ╠═e300bf92-2dcd-11f0-376c-6f98471ddac5
 # ╠═d1460590-3dbc-4e84-a970-d79062d4a7fc
 # ╠═4656da65-2a9e-494e-b718-11f371c38919

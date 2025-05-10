@@ -13,6 +13,9 @@ using Statistics: mean, cov
 # ╔═╡ 49be3f06-d6bc-4cfc-af77-a6bf8e175dfd
 using Random: randexp, bitrand, randperm
 
+# ╔═╡ 620a3555-c3c5-4948-a4bf-cbfeb7cb2df6
+md"# Law of large numbers"
+
 # ╔═╡ d6a08e60-2dd9-11f0-1d3d-b55463e0946c
 import Makie, CairoMakie
 
@@ -1686,6 +1689,7 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
+# ╠═620a3555-c3c5-4948-a4bf-cbfeb7cb2df6
 # ╠═d6a08e60-2dd9-11f0-1d3d-b55463e0946c
 # ╠═ffab09fe-38f1-4d2c-b787-8d4b57abf622
 # ╠═27116e6b-8b98-472d-9a05-45ad7bb85414
@@ -1694,11 +1698,11 @@ version = "3.6.0+0"
 # ╠═49be3f06-d6bc-4cfc-af77-a6bf8e175dfd
 # ╠═2af65c17-3f55-44b1-9313-67698f4c606f
 # ╟─0da16ae1-8a0c-4696-8416-52738fd7fe2a
-# ╠═5a10695a-d49f-4ad9-a7e5-d06c4001488f
+# ╟─5a10695a-d49f-4ad9-a7e5-d06c4001488f
 # ╠═1554c0c2-9c68-4483-bba8-65974fa935d0
 # ╟─d7ec4756-7fe5-421e-9e02-7750c0ec00f3
 # ╠═fb52f5ee-efa6-4c92-90d6-e7438de0579d
-# ╠═faed88b5-e1bb-4c9b-a41c-cf3739776384
+# ╟─faed88b5-e1bb-4c9b-a41c-cf3739776384
 # ╠═1190cd60-0899-4747-8060-7e7d8ef8b3bf
 # ╟─51087952-cf4d-4934-81b2-a169cc97f49e
 # ╟─00000000-0000-0000-0000-000000000001

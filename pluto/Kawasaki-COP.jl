@@ -53,7 +53,7 @@ import Makie, CairoMakie
 import PlutoUI
 
 # ╔═╡ 4208fac7-d6f1-4daa-9473-c0ea0339ed0f
-PlutoUI.TableOfContents()
+#PlutoUI.TableOfContents()
 
 # ╔═╡ 0dc40c69-c14b-4a45-9bfe-5e50b205927e
 md"""
