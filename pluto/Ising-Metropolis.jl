@@ -8,7 +8,7 @@ using InteractiveUtils
 using ProgressLogging: @progress
 
 # ╔═╡ 4656da65-2a9e-494e-b718-11f371c38919
-using Statistics: mean, cov
+using Statistics: mean, cov, std
 
 # ╔═╡ 1035a215-de4b-4cf0-b16b-6bc203ac941d
 using Random: randexp, bitrand, randperm
@@ -59,7 +59,7 @@ function energy(σ::AbstractMatrix{Bool})
 	return -sum(CartesianIndices(σ)) do site
 		i, j = Tuple(site)
 		neighbors_sum = σ[mod1(i + 1, L1), j] + σ[i, mod1(j + 1, L2)] # sum only up & right neighbors to avoid counting pairs twice
-		return (2σ[site] - 1) * (2 * neighbors_sum - 2)
+		return (2σ[site] - 1) * (2neighbors_sum - 2)
 	end
 end
 
@@ -71,7 +71,7 @@ function metropolis_ΔE(σ::AbstractMatrix{Bool}, site::CartesianIndex{2})
 	L1, L2 = size(σ)
 	i, j = Tuple(site)
 	neighbor_sum = σ[mod1(i - 1, L1), j] + σ[mod1(i + 1, L1), j] + σ[i, mod1(j - 1, L2)] + σ[i, mod1(j + 1, L2)]
-	return -(2 - 4σ[site]) * (2neighbor_sum - 4)
+	return 2 * (2σ[site] - 1) * (2neighbor_sum - 4)
 end
 
 # ╔═╡ 550a5cbc-3274-4070-8ba0-f886d3ca063b
@@ -93,12 +93,12 @@ function metropolis(; J::Real, L::Int, steps_between_frames::Int, number_of_fram
 end
 
 # ╔═╡ e0619df2-956b-448a-ba21-1d1be2700848
-values_of_J = [0.3, 0.4, 0.42, 0.44]
+values_of_J = [0.1, 0.4, 0.43, 0.44]
 
 # ╔═╡ f387efb2-5490-47ef-8201-d692e892b8b4
 simulations = map(values_of_J) do J
 	@info "Simulating J=$J"
-	metropolis(; J, L=50, steps_between_frames=4_000, number_of_frames=200_000)
+	metropolis(; J, L=64, steps_between_frames=4_000, number_of_frames=1_000_000)
 end
 
 # ╔═╡ bcadada9-9bf3-42cc-9ce8-b1692abfe98a
@@ -176,6 +176,51 @@ Therefore the histogram of the average magnetization we see here (particularly f
 
 An alternative algorithm to simulate from the Ising model which overcomes this difficulty is the Wolff algorithm, which flips clusters of spins which share the same sign every unit step. For more information, see [https://github.com/cossio/IsingModels.jl](https://github.com/cossio/IsingModels.jl).
 """
+
+# ╔═╡ 6f6e8f13-ceda-46d8-9dff-87fc7249a2e8
+md"""
+In his solution of the 2D Ising model, Onsager postulated the following analytical form for the magnetization as a function of $J$:
+
+$$m = \max\{1 - \operatorname{csch}^{4}(2J), 0\}^{1/8}$$
+
+This formula is only valid in the large $L$ limit. 
+
+We can check with our simulations how the agreement gets better as $L$ increases.
+"""
+
+# ╔═╡ d7d626f9-8862-4363-a92b-ed1b004ccefe
+# Exact magnetization in the large $L$ limit computed by Onsager
+onsager_magnetization(β::Real) = max(1 - csch(2β)^4, 0)^(1/oftype(β, 8))
+
+# ╔═╡ bcc64250-8eee-445e-9da3-6ca72d827306
+simulation_onsager_magnetization_Js = 0.2:0.025:0.7
+
+# ╔═╡ a3507b8e-c75c-4406-be24-7f26d6cfd4cf
+simulation_onsager_magnetization_20 = map(simulation_onsager_magnetization_Js) do J
+	@info "Simulating J=$J"
+	metropolis(; J, L=20, steps_between_frames=100, number_of_frames=2_000_000)
+end
+
+# ╔═╡ 7c2b6623-efa5-4b13-a6a9-03489b12cb40
+simulation_onsager_magnetization_64 = map(simulation_onsager_magnetization_Js) do J
+	@info "Simulating J=$J"
+	metropolis(; J, L=64, steps_between_frames=100, number_of_frames=2_000_000)
+end
+
+# ╔═╡ 40e8c3f8-4c60-4407-a516-e28de84c6afc
+let fig = Makie.Figure()
+	ax = Makie.Axis(fig[1,1]; xlabel="β", ylabel="m", width=500, height=400)
+	Makie.lines!(ax, 0:0.01:1, onsager_magnetization; color=:black, label="analytical")
+	for (L, simulations) = zip([20, 64], [simulation_onsager_magnetization_20, simulation_onsager_magnetization_64])
+		mavg = mean(sim -> 2sim .- 1, simulations)
+		mstd = stsd(sim -> 2sim .- 1, simulations)
+		Makie.scatter!(ax, simulation_onsager_magnetization_Js, mavg, color=:blue, markersize=5, label="MC, L=$L")
+		Makie.errorbars!(ax, simulation_onsager_magnetization_Js, mavg, mstd/2, color=:red, whiskerwidth=5)
+	end
+	Makie.axislegend(ax, position=:rb)
+	Makie.resize_to_layout!(fig)
+	fig
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1757,6 +1802,12 @@ version = "3.6.0+0"
 # ╠═dc33c1cf-40bd-4281-b7a4-bf14c625da4e
 # ╠═1d829ba6-d42e-4a8b-84b5-3b88dabd3817
 # ╠═43821996-dfa0-481a-a5ea-23c42d931da2
-# ╠═ffa8b4c4-c3ab-4b50-aca9-36c2b2e07c66
+# ╟─ffa8b4c4-c3ab-4b50-aca9-36c2b2e07c66
+# ╠═6f6e8f13-ceda-46d8-9dff-87fc7249a2e8
+# ╠═d7d626f9-8862-4363-a92b-ed1b004ccefe
+# ╠═bcc64250-8eee-445e-9da3-6ca72d827306
+# ╠═a3507b8e-c75c-4406-be24-7f26d6cfd4cf
+# ╠═7c2b6623-efa5-4b13-a6a9-03489b12cb40
+# ╠═40e8c3f8-4c60-4407-a516-e28de84c6afc
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

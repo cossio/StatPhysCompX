@@ -19,9 +19,9 @@ This notebook is part of the computational resources for the Statistical Physics
 
 # ╔═╡ 33ff2d1c-7a38-47fa-92cb-e5781f3b4a1c
 md"""
-We consider the XY model defined on a 2-dimensional grid lattice. Each site is occupied by a circular spin, which is represented by the angle $\theta_i \in [0, 2\pi]$. The model is then defined by the Hamiltonian:
+We consider the XY model defined on a 2-dimensional grid lattice. Each site is occupied by a circular spin, represented by an angle $\theta_i \in [0, 2\pi]$. The model is then defined by the Hamiltonian:
 
-$$H = -\sum_{(ij)} \cos(\theta_i - \theta_j)$$
+$$H = -J\sum_{(ij)} \cos(\theta_i - \theta_j)$$
 
 where the sum traverses pairs of adjacent spins $(ij)$ in the grid.
 """
@@ -86,7 +86,22 @@ values_of_J = [0.5, 1.1, 1.5, 2.5]
 # ╔═╡ 106646ee-49f3-41dd-93ea-be91b96ec706
 simulations = map(values_of_J) do J
 	@info "Simulating J=$J"
-	metropolis(; J, L=250, steps_between_frames=4_000, number_of_frames=10_000)
+	metropolis(; J, L=300, steps_between_frames=4_000, number_of_frames=10_000)
+end
+
+# ╔═╡ 206657e7-4c1b-417a-a683-62d53343d899
+md"""
+To check that our simulations have equilibrated, we can inspect the evolution some global properties of the system in time. For example, we can look at how the energy of the lattice evolves in time, and whether it reaches a steady value as the simulation progresses.
+"""
+
+# ╔═╡ bdc4b58d-dc6e-4c16-b8e8-a56982d0b66f
+let fig = Makie.Figure()
+	for (n, (J, sim)) = enumerate(zip(values_of_J, simulations))
+		ax = Makie.Axis(fig[n,1]; width=600, height=150, xlabel="time", ylabel="energy per spin")
+		Makie.lines!(ax, [energy(sim[:,:,t]) / length(sim[:,:,t]) for t = axes(sim, 3)])
+	end
+	Makie.resize_to_layout!(fig)
+	fig
 end
 
 # ╔═╡ a0d2eaff-51ea-49b7-90ca-18aa33970d58
@@ -98,7 +113,7 @@ let fig = Makie.Figure()
 		spins = simulations[n][:, :, 10_000]
 		L1, L2 = size(spins)
 		row, col = fldmod1(n, 2)
-		ax = Makie.Axis(fig[row, col]; title = "J = $J", aspect = Makie.DataAspect(), width=300, height=300)
+		ax = Makie.Axis(fig[row, col]; title = "J = $J", width=300, height=300)
 		hm = Makie.heatmap!(ax, 1:L1, 1:L2, spins; colormap=Makie.cgrad(:hsv, 256, categorical=false), colorrange=(0,2π), interpolate=false)
 		if n == 1
 	    	tb = Makie.Colorbar(fig[1:2,3], hm; label = "Angle (rad)", ticks = (0:π/2:2π, ["0", "π/2", "π", "3π/2", "2π"]))
@@ -1637,6 +1652,8 @@ version = "3.6.0+0"
 # ╠═d4e0ee8b-dae4-4ba5-9a02-51d896707920
 # ╠═556397ba-d25f-48f0-bd8b-f47363ca9611
 # ╠═106646ee-49f3-41dd-93ea-be91b96ec706
+# ╟─206657e7-4c1b-417a-a683-62d53343d899
+# ╠═bdc4b58d-dc6e-4c16-b8e8-a56982d0b66f
 # ╠═a0d2eaff-51ea-49b7-90ca-18aa33970d58
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

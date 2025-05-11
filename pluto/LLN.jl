@@ -32,20 +32,22 @@ To make this more precise, we compute the variance of $\overline{X_n}$ as follow
 
 $$\mathbb{E}(\overline{X_n} - \mu)^{2} = \frac{1}{n^2} \sum_{i=1}^{n} \mathbb{E}(X_i-\mu)^2 = \frac{1}{n}\sigma^{2}$$
 
-where $\sigma^{2} = \mathbb{E}(X-\mu)^2$ is the variance of $X$, which is finite by assumption. It follows that the variance of $\overline{X_n}$ decays to zero as $n\rightarrow\infty$.
+where $\sigma^{2} = \mathbb{E}(X-\mu)^2$ is the variance of $X$, which is finite by assumption. It follows that the variance of $\overline{X_n}$ decays to zero as $n\rightarrow\infty$, at a rate of $1/n$.
 """
 
 # ╔═╡ 5a10695a-d49f-4ad9-a7e5-d06c4001488f
 md"""
 Let's consider a few examples. We will now sample $X$ from various distributions and verify that the sample mean indeed converges to the mean of $X$.
+
+We will consider the Normal, Beta, T-student and Gamma distributions. The following plots show $n$ samples (in gray) of one of these distributions. The dashed blue line gives the mean of the original random variable, while the red line gives the sample mean $\overline{X_n}$ as a function of $n$. As predicted by the Law of Large Numbers, the sample mean approaches the mean of the random variable as $n$ increases.
 """
 
 # ╔═╡ 1554c0c2-9c68-4483-bba8-65974fa935d0
 let fig = Makie.Figure()
-	for (n, d) = enumerate([Distributions.Normal(0,2), Distributions.Beta(3,2), Distributions.TDist(14), Distributions.Gamma(6,3)])
+	for (n, (d, title)) = enumerate(zip([Distributions.Normal(0,2), Distributions.Beta(3,2), Distributions.TDist(14), Distributions.Gamma(6,3)], ["Normal", "Beta", "T-student", "Gamma"]))
 		x = rand(d, 100)
 		
-		ax = Makie.Axis(fig[n,1], width=700, height=200, title=string(d), xlabel="n", ylabel="x")
+		ax = Makie.Axis(fig[n,1]; width=700, height=200, title, xlabel="n", ylabel="x")
 		Makie.stem!(ax, x; color=:gray, label="samples", offset=mean(d), stemcolor=:gray, trunklinestyle=:dash, trunkcolor=:blue)
 		Makie.lines!(ax, cumsum(x) ./ (1:length(x)); color=:red, linewidth=3, label="average")
 		if n == 1
@@ -58,15 +60,17 @@ end
 
 # ╔═╡ d7ec4756-7fe5-421e-9e02-7750c0ec00f3
 md"""
-To prove the law of large numbers we have assumed that $\mathbb E X^2$ is finite. In fact, Kolmogorov proved a stronger law of large numbers, assuming only that $\mathbb E |X|$ was finite.
+Our proof above that the variance of the sample mean decays to zero as $n$ increases relies on the assumption that $\mathbb E X^2$ is finite. In fact, Kolmogorov proved a stronger version of the law of large numbers, assuming only that $\mathbb E |X|$ was finite.
 
-What happens if these assumptions are violated?
+But what happens if these assumptions are violated?
 
 An interesting example is the Cauchy distribution, which has the density:
 
 $$p(x) = \frac{1}{\pi} \frac{1}{1+x^2}$$
 
-The Cauchy distribution does not have finite moments.
+The Cauchy distribution does not have finite moments. In particular, $\mathbb E X^2$ and $\mathbb E |X|$ are both infinite. The assumptions behind the Law of Large Numbers do not hold anymore in this case. What happens if we sample a large number of random variates of the Cauchy distribution and compute the sample mean?
+
+Let's repeat the above experiment, but this time using the Cauchy distribution.
 """
 
 # ╔═╡ fb52f5ee-efa6-4c92-90d6-e7438de0579d
@@ -159,6 +163,11 @@ let fig = Makie.Figure()
 	Makie.resize_to_layout!(fig)
 	fig
 end
+
+# ╔═╡ 564296c6-5aa4-4d3d-9c1e-417ed6ab3ef1
+md"""
+The assumption that $X$ has bounded moments is indeed important for the validity of the LLN.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1681,7 +1690,7 @@ version = "3.6.0+0"
 # ╟─0da16ae1-8a0c-4696-8416-52738fd7fe2a
 # ╟─5a10695a-d49f-4ad9-a7e5-d06c4001488f
 # ╠═1554c0c2-9c68-4483-bba8-65974fa935d0
-# ╟─d7ec4756-7fe5-421e-9e02-7750c0ec00f3
+# ╠═d7ec4756-7fe5-421e-9e02-7750c0ec00f3
 # ╠═fb52f5ee-efa6-4c92-90d6-e7438de0579d
 # ╟─faed88b5-e1bb-4c9b-a41c-cf3739776384
 # ╠═fd48972a-f55f-46ea-b06a-728ec8f811b5
@@ -1690,5 +1699,6 @@ version = "3.6.0+0"
 # ╟─fd99b96d-7896-4dcd-8207-e34867b82068
 # ╟─5b4c1804-229c-40ef-bd4b-b3b5551c09f5
 # ╠═b094a9d8-266d-4a7d-a17f-3120a8f148ce
+# ╟─564296c6-5aa4-4d3d-9c1e-417ed6ab3ef1
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
