@@ -55,3 +55,7 @@ The following links point to Pluto notebooks. Clicking on a link will open a web
 Other resources in Julia:
 
 - More simulations of the 2D Ising model, with the cluster Wolff algorithm: https://github.com/cossio/IsingModels.jl.
+
+External resources:
+
+- XY model: https://kjslag.github.io/XY/.
