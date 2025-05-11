@@ -13,9 +13,15 @@ using Statistics: mean, cov, std
 # ╔═╡ 1035a215-de4b-4cf0-b16b-6bc203ac941d
 using Random: randexp, bitrand, randperm
 
-# ╔═╡ e7a1dec5-37bb-4db3-8b8d-b1fbd1b611bc
-md"""# Ising model simulated with the Metropolis algorithm
+# ╔═╡ 4cfd958c-b8dc-46df-ba11-4f2c5b58c0b0
+md"""
+# Ising model simulated with the Metropolis algorithm
 
+This notebook is part of the computational resources for the Statistical Physics course at École Polytechnique. To return to the main repository, follow this link: [https://github.com/cossio/StatPhysCompX](https://github.com/cossio/StatPhysCompX).
+"""
+
+# ╔═╡ e7a1dec5-37bb-4db3-8b8d-b1fbd1b611bc
+md"""
 The 2-dimensional Ising model is defined by the energy function:
 
 ```math
@@ -1785,6 +1791,7 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
+# ╟─4cfd958c-b8dc-46df-ba11-4f2c5b58c0b0
 # ╟─e7a1dec5-37bb-4db3-8b8d-b1fbd1b611bc
 # ╠═e300bf92-2dcd-11f0-376c-6f98471ddac5
 # ╠═d1460590-3dbc-4e84-a970-d79062d4a7fc
