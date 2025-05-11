@@ -4,14 +4,8 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 4159a36c-8a98-4c40-9715-c20ba27c8055
-using ProgressLogging: @progress, @withprogress, @logprogress
-
 # ╔═╡ 8c9547ef-e57b-49c1-8d01-f29e9e770c85
-using Statistics: mean, cov
-
-# ╔═╡ 49be3f06-d6bc-4cfc-af77-a6bf8e175dfd
-using Random: randexp, bitrand, randperm
+using Statistics: mean
 
 # ╔═╡ 620a3555-c3c5-4948-a4bf-cbfeb7cb2df6
 md"# Law of large numbers"
@@ -19,14 +13,8 @@ md"# Law of large numbers"
 # ╔═╡ d6a08e60-2dd9-11f0-1d3d-b55463e0946c
 import Makie, CairoMakie
 
-# ╔═╡ ffab09fe-38f1-4d2c-b787-8d4b57abf622
-import PlutoUI
-
 # ╔═╡ 27116e6b-8b98-472d-9a05-45ad7bb85414
 import Distributions, Random
-
-# ╔═╡ 2af65c17-3f55-44b1-9313-67698f4c606f
-#PlutoUI.TableOfContents()
 
 # ╔═╡ 0da16ae1-8a0c-4696-8416-52738fd7fe2a
 md"""
@@ -79,10 +67,10 @@ The Cauchy distribution does not have finite moments.
 
 # ╔═╡ fb52f5ee-efa6-4c92-90d6-e7438de0579d
 let fig = Makie.Figure()
-	Random.seed!(20)
+	Random.seed!(10)
 	d = Distributions.Cauchy()
-	x = rand(d, 100)
-	ax = Makie.Axis(fig[1,1], width=700, height=200, title="Cauchy distribution", xlabel="n", ylabel="x")
+	x = rand(d, 500)
+	ax = Makie.Axis(fig[1,1]; width=1000, height=300, title="Cauchy distribution", xlabel="n", ylabel="x")
 	Makie.stem!(ax, x; color=:gray, label="samples", offset=mean(d), stemcolor=:gray, trunklinestyle=:dash, trunkcolor=:blue)
 	Makie.lines!(ax, cumsum(x) ./ (1:length(x)); color=:red, linewidth=3, label="average")
 	Makie.axislegend(ax; position=:rb)
@@ -92,22 +80,21 @@ end
 
 # ╔═╡ faed88b5-e1bb-4c9b-a41c-cf3739776384
 md"""
-Notice that the Cauchy distribution allows for extremely large fluctuations. In the previous plots, these large fluctuations are hiding the behavior of the sample mean. So let's zoom in the behavior of the sample mean alone. And let's compare that to one of the example distributions above for which the law of large numbers applied.
+Notice that the Cauchy distribution allows for extremely large fluctuations. In the previous plots, these large fluctuations are hiding the behavior of the sample mean. So let's zoom in the behavior of the sample mean alone, for increasing values of $n$. And let's compare that to one of the example distributions above for which the law of large numbers applied, e.g. the Normal distribution.
+
+We now plot $n$ in a logarithmic scale to make the fluctuations of the sample mean apparent even at very large values of $n$.
 """
 
-# ╔═╡ 1190cd60-0899-4747-8060-7e7d8ef8b3bf
+# ╔═╡ fd48972a-f55f-46ea-b06a-728ec8f811b5
 let fig = Makie.Figure()
 	Random.seed!(10)
-	for (col, n) = enumerate([100, 1000, 10000])
-		x_Cauchy = rand(Distributions.Cauchy(), n)
-		x_Normal = rand(Distributions.Normal(), n)
-		ax = Makie.Axis(fig[col,1], width=700, height=150, xlabel="n", ylabel="x")
-		Makie.lines!(ax, cumsum(x_Cauchy) ./ (1:length(x_Cauchy)); color=:red, linewidth=2, label="Cauchy")
-		Makie.lines!(ax, cumsum(x_Normal) ./ (1:length(x_Normal)); color=:blue, linewidth=2, label="Normal")
-		if col == 3
-			Makie.axislegend(ax; position=:rb)
-		end
-	end
+	n = 10^6
+	x_Cauchy = rand(Distributions.Cauchy(), n)
+	x_Normal = rand(Distributions.Normal(), n)
+	ax = Makie.Axis(fig[1,1], width=700, height=200, xlabel="n", ylabel="x", xscale=log10)
+	Makie.lines!(ax, cumsum(x_Cauchy) ./ (1:length(x_Cauchy)); color=:red, linewidth=2, label="Cauchy")
+	Makie.lines!(ax, cumsum(x_Normal) ./ (1:length(x_Normal)); color=:blue, linewidth=2, label="Normal")
+	Makie.axislegend(ax; position=:rb)
 	Makie.resize_to_layout!(fig)
 	fig
 end
@@ -130,14 +117,31 @@ $$\mathbb E e^{it\overline{X_n}}
 But we can verify that $f(t/n)^{n}=f(t)$ for the Cauchy distribution. Thus the sample mean $\overline{X_n}$ has the *same* Cauchy distribution as the individual $X_i$.
 """
 
+# ╔═╡ db0512f2-b0c1-4554-8ef0-e6ab31b1fd7d
+let fig = Makie.Figure()
+	Random.seed!(10)
+	bins = -7:0.1:7
+	ax = Makie.Axis(fig[1,1], width=700, height=300, xlabel="n", ylabel="x")
+	Makie.hist!(ax, rand(Distributions.Cauchy(), 10^6); color=:gray, label="Cauchy samples", normalization=:pdf, bins)
+	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Cauchy(), 10^4, 10^2); dims=2); dims=2); normalization=:pdf, bins, linewidth=5, color=:blue, label="Sample average (n=100)")
+	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Cauchy(), 10^4, 10^3); dims=2); dims=2); normalization=:pdf, bins, linewidth=3, color=:red, label="Sample average (n=1000)")
+	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Cauchy(), 10^4, 10^4); dims=2); dims=2); normalization=:pdf, bins, linewidth=2, color=:orange, label="Sample average (n=10000)")
+	Makie.axislegend(ax; position=:rt)
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ fd99b96d-7896-4dcd-8207-e34867b82068
+md"""
+The Cauchy distribution exhibits a very different behavior than what one would expect from the law of large numbers!
+"""
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
-PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-ProgressLogging = "33c8b6b6-d38a-422a-b730-caa89a2f386c"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
@@ -145,8 +149,6 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 CairoMakie = "~0.13.4"
 Distributions = "~0.25.119"
 Makie = "~0.22.4"
-PlutoUI = "~0.7.23"
-ProgressLogging = "~0.1.4"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -155,7 +157,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "9de856c7c1d500f49e2e912b511ef71374990b77"
+project_hash = "451f5314ea983426d21be052b22274aa8ab164b3"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -167,12 +169,6 @@ weakdeps = ["ChainRulesCore", "Test"]
     [deps.AbstractFFTs.extensions]
     AbstractFFTsChainRulesCoreExt = "ChainRulesCore"
     AbstractFFTsTestExt = "Test"
-
-[[deps.AbstractPlutoDingetjes]]
-deps = ["Pkg"]
-git-tree-sha1 = "6e1d2a35f2f90a4bc7c2ed98079b2ba09c35b83a"
-uuid = "6e696c72-6542-2067-7265-42206c756150"
-version = "1.3.2"
 
 [[deps.AbstractTrees]]
 git-tree-sha1 = "2d9c9a55f9c93e8887ad391fbae72f8ef55e1177"
@@ -620,24 +616,6 @@ deps = ["LinearAlgebra", "OpenLibm_jll", "SpecialFunctions"]
 git-tree-sha1 = "68c173f4f449de5b438ee67ed0c9c748dc31a2ec"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.28"
-
-[[deps.Hyperscript]]
-deps = ["Test"]
-git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
-uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.4"
-
-[[deps.HypertextLiteral]]
-deps = ["Tricks"]
-git-tree-sha1 = "7134810b1afce04bbc1045ca1985fbe81ce17653"
-uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.5"
-
-[[deps.IOCapture]]
-deps = ["Logging", "Random"]
-git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
-uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.5"
 
 [[deps.ImageAxes]]
 deps = ["AxisArrays", "ImageBase", "ImageCore", "Reexport", "SimpleTraits"]
@@ -1152,12 +1130,6 @@ git-tree-sha1 = "3ca9a356cd2e113c420f2c13bea19f8d3fb1cb18"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
 version = "1.4.3"
 
-[[deps.PlutoUI]]
-deps = ["AbstractPlutoDingetjes", "Base64", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
-git-tree-sha1 = "5152abbdab6488d5eec6a01029ca6697dff4ec8f"
-uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.23"
-
 [[deps.PolygonOps]]
 git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
 uuid = "647866c9-e3ac-4575-94e7-e3d426903924"
@@ -1179,12 +1151,6 @@ version = "1.4.3"
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 version = "1.11.0"
-
-[[deps.ProgressLogging]]
-deps = ["Logging", "SHA", "UUIDs"]
-git-tree-sha1 = "80d919dee55b9c50e8d9e2da5eeafff3fe58b539"
-uuid = "33c8b6b6-d38a-422a-b730-caa89a2f386c"
-version = "0.1.4"
 
 [[deps.ProgressMeter]]
 deps = ["Distributed", "Printf"]
@@ -1493,11 +1459,6 @@ git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.11.3"
 
-[[deps.Tricks]]
-git-tree-sha1 = "6cae795a5a9313bbb4f60683f7263318fc7d1505"
-uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
-version = "0.1.10"
-
 [[deps.TriplotBase]]
 git-tree-sha1 = "4d4ed7f294cda19382ff7de4c137d24d16adc89b"
 uuid = "981d1d27-644d-49a2-9326-4793e63143c3"
@@ -1691,19 +1652,17 @@ version = "3.6.0+0"
 # ╔═╡ Cell order:
 # ╠═620a3555-c3c5-4948-a4bf-cbfeb7cb2df6
 # ╠═d6a08e60-2dd9-11f0-1d3d-b55463e0946c
-# ╠═ffab09fe-38f1-4d2c-b787-8d4b57abf622
 # ╠═27116e6b-8b98-472d-9a05-45ad7bb85414
-# ╠═4159a36c-8a98-4c40-9715-c20ba27c8055
 # ╠═8c9547ef-e57b-49c1-8d01-f29e9e770c85
-# ╠═49be3f06-d6bc-4cfc-af77-a6bf8e175dfd
-# ╠═2af65c17-3f55-44b1-9313-67698f4c606f
 # ╟─0da16ae1-8a0c-4696-8416-52738fd7fe2a
 # ╟─5a10695a-d49f-4ad9-a7e5-d06c4001488f
 # ╠═1554c0c2-9c68-4483-bba8-65974fa935d0
 # ╟─d7ec4756-7fe5-421e-9e02-7750c0ec00f3
 # ╠═fb52f5ee-efa6-4c92-90d6-e7438de0579d
 # ╟─faed88b5-e1bb-4c9b-a41c-cf3739776384
-# ╠═1190cd60-0899-4747-8060-7e7d8ef8b3bf
+# ╠═fd48972a-f55f-46ea-b06a-728ec8f811b5
 # ╟─51087952-cf4d-4934-81b2-a169cc97f49e
+# ╠═db0512f2-b0c1-4554-8ef0-e6ab31b1fd7d
+# ╟─fd99b96d-7896-4dcd-8207-e34867b82068
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

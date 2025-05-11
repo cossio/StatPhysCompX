@@ -21,9 +21,7 @@ Let $X_1,\dots,X_n$ be $n$ independent and identically distributed real random v
 
 $$\overline{X_n} = \frac{1}{n} \sum_{i=1}^{n} X_i$$
 
-denote the sample mean.
-
-The Central Limit Theorem (CLT) tells us that the rescaled random variable 
+denote the sample mean. The Central Limit Theorem (CLT) tells us that the rescaled random variable 
 
 $$\sqrt{n} (\overline{X_n} - \mu)$$
 
@@ -39,8 +37,56 @@ import PlutoUI
 # ╔═╡ 72486d01-4eb8-41a9-be3e-380e79600d7f
 import Distributions, Random
 
-# ╔═╡ 61381cfb-28f5-4299-9855-9d85f887996b
+# ╔═╡ 13c762f1-e000-487a-81bd-b025d8f0764c
+md"""
+As an example, we will consider binary random variables $X_i \in \{0,1\}$, with means $\mathbb E X_i=0.5$. Then the sum:
 
+$$Y_n = \sum_{i=1}^{n} X_i$$
+
+simply counts how many of the $X_i$ are equal to 1. The count $Y_n$ has a binomial distribution,
+
+$$P(Y_n = y) = \binom{n}{y} 2^{-n}$$
+
+with mean $\mathbb E Y_n = n/2$.
+
+According to the CLT, the distribution of $Y_n / \sqrt{n} - \sqrt{n}/2$ approaches the normal distribution of zero mean and variance $1/4$.
+"""
+
+# ╔═╡ 3b1320af-6782-4bd4-8f66-5bb50d88d0f5
+md"""
+First let's see how well the binomial distribution fits the empirical histogram of a sum of $n$ binary variables. If enough samples of $Y_n$ are drawn to plot an accurate histogram, this matching will be exact. In particular, it is valid for any $n$ (not just for large $n$).
+"""
+
+# ╔═╡ 61381cfb-28f5-4299-9855-9d85f887996b
+let fig = Makie.Figure()
+	ax = Makie.Axis(fig[1,1], width=400, height=200)
+	Makie.hist!(ax, dropdims(sum(rand(1000, 10) .< 0.5; dims=2); dims=2); normalization=:pdf, bins=0:10, label="Y_n")
+	Makie.scatterlines!(ax, 0.5:10.5, Distributions.pdf.(Distributions.Binomial(10, 0.5), 0:10), color=:black, label="Binomial PDF")
+	Makie.axislegend(ax; position=:rt)
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 907ce6b7-5f24-47b6-ad9f-76a5f14c0914
+md"""
+Now, let's test the CLT.
+"""
+
+# ╔═╡ ae79ef6a-c228-47b4-924a-79537ac18caf
+let fig = Makie.Figure()
+	ax = Makie.Axis(fig[1,1], width=400, height=300)
+	for n = [100, 1000, 10000]
+		#Makie.hist!(ax, dropdims(sum(rand(1000, n) .< 0.5; dims=2) / sqrt(n) .- sqrt(n)/2; dims=2); normalization=:pdf, bins=-3:0.1:3, label="n=$n")
+		Makie.lines!(ax, (0:n) ./ sqrt(n) .- sqrt(n)/2, Distributions.pdf.(Distributions.Binomial(10, 0.5), 0:n), label="Binomial $n")
+	end
+
+	#akie.lines!(ax, -3:0.01:3, Distributions.pdf.(Distributions.Normal(0, 1/2), -3:0.01:3), color=:black, label="Normal PDF", linewidth=3)
+	#Makie.xlims!(ax, -2, 2)
+	#Makie.ylims!(ax, 0, 1.5)
+	Makie.axislegend(ax; position=:rt)
+	Makie.resize_to_layout!(fig)
+	fig
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1607,13 +1653,17 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═0a14c5e6-4a2a-4d18-a11a-81b72774aed2
+# ╟─0a14c5e6-4a2a-4d18-a11a-81b72774aed2
 # ╠═1bd6bd85-0735-4a52-b7cc-158eaf44c63c
 # ╠═05b0b44f-7564-4bad-a6fb-54c5963b5c58
 # ╠═72486d01-4eb8-41a9-be3e-380e79600d7f
 # ╠═2772fc7d-85ce-4169-ae43-5125cda3d3c6
 # ╠═d3f7fcec-662a-4559-8a1b-4ae182ad2353
 # ╠═c6e6c824-8502-43c9-b722-6a4e00ca08d7
+# ╟─13c762f1-e000-487a-81bd-b025d8f0764c
+# ╟─3b1320af-6782-4bd4-8f66-5bb50d88d0f5
 # ╠═61381cfb-28f5-4299-9855-9d85f887996b
+# ╠═907ce6b7-5f24-47b6-ad9f-76a5f14c0914
+# ╠═ae79ef6a-c228-47b4-924a-79537ac18caf
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
