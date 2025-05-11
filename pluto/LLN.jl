@@ -8,7 +8,11 @@ using InteractiveUtils
 using Statistics: mean
 
 # ╔═╡ 620a3555-c3c5-4948-a4bf-cbfeb7cb2df6
-md"# Law of large numbers"
+md"""
+# Law of large numbers
+
+This notebook is part of the computational resources for the Statistical Physics course at École Polytechnique. To return to the main repository, follow this link: [https://github.com/cossio/StatPhysCompX](https://github.com/cossio/StatPhysCompX).
+"""
 
 # ╔═╡ d6a08e60-2dd9-11f0-1d3d-b55463e0946c
 import Makie, CairoMakie
@@ -131,6 +135,11 @@ let fig = Makie.Figure()
 	fig
 end
 
+# ╔═╡ fd99b96d-7896-4dcd-8207-e34867b82068
+md"""
+The Cauchy distribution exhibits a very different behavior than what one would expect from the law of large numbers!
+"""
+
 # ╔═╡ 5b4c1804-229c-40ef-bd4b-b3b5551c09f5
 md"""
 Let's compare that to the distribution of the sample average of samples from a normal distribution. In contrast to the Cauchy case, the sample average of a Normal distribution quickly concentrates as $n$ increases.
@@ -150,11 +159,6 @@ let fig = Makie.Figure()
 	Makie.resize_to_layout!(fig)
 	fig
 end
-
-# ╔═╡ fd99b96d-7896-4dcd-8207-e34867b82068
-md"""
-The Cauchy distribution exhibits a very different behavior than what one would expect from the law of large numbers!
-"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1670,7 +1674,7 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═620a3555-c3c5-4948-a4bf-cbfeb7cb2df6
+# ╟─620a3555-c3c5-4948-a4bf-cbfeb7cb2df6
 # ╠═d6a08e60-2dd9-11f0-1d3d-b55463e0946c
 # ╠═27116e6b-8b98-472d-9a05-45ad7bb85414
 # ╠═8c9547ef-e57b-49c1-8d01-f29e9e770c85

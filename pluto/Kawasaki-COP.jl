@@ -17,6 +17,11 @@ using Random: randexp, bitrand, randperm
 md"""
 # Conserved order-parameter Ising model
 
+This notebook is part of the computational resources for the Statistical Physics course at École Polytechnique. To return to the main repository, follow this link: [https://github.com/cossio/StatPhysCompX](https://github.com/cossio/StatPhysCompX).
+"""
+
+# ╔═╡ 452cf818-1dec-45ba-a49c-534bd8e156dc
+md"""
 Like the standard Ising model, the conserved order-parameter (COP) Ising model is defined by the Hamiltonian:
 
 $$H = -J\sum_{(ij)}s_i s_j$$
@@ -65,24 +70,43 @@ The simplest algorithm implementing this idea is the Kawasaki algorithm. We choo
 """
 
 # ╔═╡ aee1f8f4-dfa0-4ead-9ddc-3dc96bed969d
-# Initialize a lattice with a random configuration with a given total magnetization 'M'.
-# Note that we use bits instead of integers to represent the spins to save memory.
-# To convert between a bit (0,1) to a spin (+/- 1), we use the formula s = 2σ - 1.
+# Initialize a lattice with a random configuration, with a given total magnetization 'M'.
+# Note that we use binary bits instead of integers to represent the spins to save memory.
+# To convert between a binary bit variable σ ∈ {0,1} to a spin variable s ∈ {-1, +1}, we use the formula s = 2σ - 1.
 function random_lattice(; L1::Int, L2::Int, M::Int)
 	N = L1 * L2
-	@assert M ∈ 2L2 - N:2:N - 2L2
-	
+
+	# We store the configuration of the lattice in a binary array.
 	σ = falses(L1, L2)
+
+	# We impose a boundary condition, where the top row of the lattice is always pointing up,
+	# while the bottom row is always pointing down.
+	# This helps break the translation symmetry of the domain and helps with visualization of the phase separation.
 	σ[:, 1] .= true # boundary condition
-	
+
+	# Note that the total magnetization is constrained to take values between 2*L2 - N (all spins pointing down except the top row)
+	# and N - 2*L2 (all spins pointing up except the bottom row). Moreover, each spin flip changes the magnetization by two units.
+	# Therefore, M can only take values 2*L2 - N, 2*L2 - N + 2, 2*L2 - N + 4, ..., N - 2*L2.
+	@assert M ∈ 2L2 - N:2:N - 2L2
+
 	@assert sum(2σ[:,:] .- 1) == 2L1 - N
 	@assert iseven(M + N)
+
+	# This is the total number of flips we need to do to achieve the desired M. We will do them at random
+	# throughout the lattice (without touching the boundary condition).
 	flips_needed = (M + N) ÷ 2 - L1
-	
+
+	# We select a random subset of sites to do the flips.
 	for i = filter(i -> 1 < i[2] < L2, CartesianIndices(σ[:,:]))[randperm(N - 2L1)][1:flips_needed]
 		σ[i] = true
 	end
+
+	# Check that the magnetization now is indeed equal to 'M'.
 	@assert sum(2σ[:,:] .- 1) == M
+
+	# Check boundary condition
+	@assert all(2σ[:,1] .- 1 .== +1)
+	@assert all(2σ[:,end] .- 1 .== -1)
 	
 	return σ
 end
@@ -179,14 +203,24 @@ end
 # compute the total energy of the lattice
 energy(σ::AbstractMatrix{Bool}) = -sum((2σ[i] - 1) * (2σ[j] - 1) for i = CartesianIndices(σ) for j = neighbors_up_right(σ, i))
 
+# ╔═╡ c917a128-383e-47da-878d-58c62bd97c95
+md"""
+We will do simulations at increasing values of $J$ (equivalently, decreasing values of the temperature).
+"""
+
 # ╔═╡ fdc07a87-977b-4ee1-9433-c03c156113d8
-values_of_J = [0.1, 0.5, 1, 5]
+values_of_J = [0.1, 0.4, 0.5, 1]
 
 # ╔═╡ 78a2efe9-79e7-4632-ae0b-2073e040320d
 simulations = map(values_of_J) do J
 	@info "Simulating J=$J"
 	kawasaki(J; L1=100, L2=50, M=0, steps_between_frames=4_000, number_of_frames=25_000)
 end
+
+# ╔═╡ 68dceebc-7c7a-490f-8db7-68f5621a359d
+md"""
+Let's take a look at some typical snapshots of the simulations we just did.
+"""
 
 # ╔═╡ 34556218-4083-4798-b6ae-971716f53fad
 # Show some typical snapshots
@@ -228,7 +262,7 @@ let fig = Makie.Figure()
 	
 	Makie.resize_to_layout!(fig)
 
-	# Specifiy a path to desired destination of the video
+	# Specifiy a path on your local computer to the desired destination of the video file
 	filename = "/Users/jfdcd/teaching/2025/StatPhysCompX/temp/kawasaki.mp4"
 		
 	frame_step = 10
@@ -237,7 +271,7 @@ let fig = Makie.Figure()
 		@logprogress t/nsteps
 	end
 
-	println("✔️ Saved animation to $filename")
+	println("Saved animation to $filename")
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1798,6 +1832,7 @@ version = "3.6.0+0"
 
 # ╔═╡ Cell order:
 # ╟─1c74c604-5305-4ff4-bca2-6a1a1f958f46
+# ╟─452cf818-1dec-45ba-a49c-534bd8e156dc
 # ╠═fd492bd6-2c43-11f0-3362-8f17eec1b17b
 # ╠═759dac65-7ad7-48d9-b073-a9b731d0d38b
 # ╠═c2c58635-0c3f-406e-9c01-890cf539a85c
@@ -1813,8 +1848,10 @@ version = "3.6.0+0"
 # ╠═6dd0b625-9fdb-4435-9641-08b30ed486e4
 # ╠═f81c5538-7f0d-4672-a69d-53c0e2dc3601
 # ╠═6acc3073-b2ec-4074-9bc3-77c12c02dba9
+# ╟─c917a128-383e-47da-878d-58c62bd97c95
 # ╠═fdc07a87-977b-4ee1-9433-c03c156113d8
 # ╠═78a2efe9-79e7-4632-ae0b-2073e040320d
+# ╟─68dceebc-7c7a-490f-8db7-68f5621a359d
 # ╠═34556218-4083-4798-b6ae-971716f53fad
 # ╠═4ce3aed5-6243-431e-ae7f-edd251055094
 # ╟─00000000-0000-0000-0000-000000000001
