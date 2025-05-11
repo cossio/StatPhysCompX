@@ -19,11 +19,10 @@ md"""# Ising model simulated with the Metropolis algorithm
 The 2-dimensional Ising model is defined by the energy function:
 
 ```math
-E(\mathbf{\sigma}) = - \sum_{\langle i j \rangle} \sigma_i \sigma_j
+E(\mathbf{\sigma}) = - J\sum_{\langle i j \rangle} \sigma_i \sigma_j
 ```
 
-where $\langle i j \rangle$ refers to connected pairs of sites in the square grid lattice, and $\sigma_i = \pm 1$ are spins.
-At inverse temperature $\beta$, this defines a Boltzmann probability distribution:
+where $\langle i j \rangle$ refers to connected pairs of sites in the square grid lattice, $\sigma_i = \pm 1$ are spins, and $J$ is a parameter controlling the strength of the interactions between neighboring spins. At inverse temperature $\beta$, this defines a Boltzmann probability distribution:
 
 ```math
 P(\mathbf{\sigma}) = \frac{1}{Z} \mathrm{e}^{-\beta E (\mathbf{\sigma})}
@@ -40,9 +39,9 @@ is the partition function.
 In the two-dimensional grid lattice, we assume we have a $L\times L$ plane grid, where each spin is connected to its four neighbors.
 We assume periodic boundary conditions, so spin `(1,1)` is connected to spins `(1,L)` and `(L,1)`.
 
-In the thermodynamic limit (large `L`), this model suffers a phase transition at the critical inverse temperature $\beta \approx 0.44$, where it acquires a non-zero magnetization. The model was solved analytically by Onsager in 1944, who derived exact expressions for the magnetization, the free energy, the heat capacity, and the internal energy in the thermodynamic limits.
+In the thermodynamic limit (large `L`), this model suffers a phase transition at the critical inverse temperature $J\beta \approx 0.44$, where it acquires a non-zero magnetization. The model was solved analytically by Onsager in 1944, who derived exact expressions for the magnetization, the free energy, the heat capacity, and the internal energy in the thermodynamic limits.
 
-In this package, the system is simulated using the Metropolis algorithm.
+In this package, the system is simulated using the Metropolis algorithm. Note that we can absorb $\beta$ into $J$ by re-defining $J \rightarrow \beta J$, so that in what follows we only consider $J$ as a free parameter.
 
 ## References
 
@@ -125,8 +124,8 @@ let fig = Makie.Figure()
 	for n = 1:4
 		J = values_of_J[n]
 		row, col = fldmod1(n, 2)
-		ax = Makie.Axis(fig[row, col]; title = "J = $J", width=500, height=250, xlabel="time", ylabel="average magnetization")
-		Makie.lines!(ax, axes(simulations[n], 3), dropdims(mean(2simulations[n] .- 1; dims=(1,2)); dims=(1,2)))
+		ax = Makie.Axis(fig[row, col]; title = "J = $J", width=500, height=250, xlabel="time", ylabel="magnetization per spin")
+		Makie.lines!(ax, axes(simulations[n], 3), dropdims(2mean(simulations[n]; dims=(1,2)) .- 1; dims=(1,2)))
 		Makie.ylims!(ax, -1, 1)
 	end
 	Makie.resize_to_layout!(fig)
@@ -211,11 +210,12 @@ end
 let fig = Makie.Figure()
 	ax = Makie.Axis(fig[1,1]; xlabel="β", ylabel="m", width=500, height=400)
 	Makie.lines!(ax, 0:0.01:1, onsager_magnetization; color=:black, label="analytical")
-	for (L, simulations) = zip([20, 64], [simulation_onsager_magnetization_20, simulation_onsager_magnetization_64])
-		mavg = mean(sim -> 2sim .- 1, simulations)
-		mstd = stsd(sim -> 2sim .- 1, simulations)
-		Makie.scatter!(ax, simulation_onsager_magnetization_Js, mavg, color=:blue, markersize=5, label="MC, L=$L")
-		Makie.errorbars!(ax, simulation_onsager_magnetization_Js, mavg, mstd/2, color=:red, whiskerwidth=5)
+	for (L, simulations, color) = zip([20, 64], [simulation_onsager_magnetization_20, simulation_onsager_magnetization_64], [:blue, :red])
+		m = [abs.(dropdims(2mean(sim; dims=(1,2)) .- 1; dims=(1,2))) for sim = simulations]
+		mavg = map(mean, m)
+		mstd = map(std, m)
+		Makie.scatter!(ax, simulation_onsager_magnetization_Js, mavg; color, markersize=5, label="MC, L=$L")
+		Makie.errorbars!(ax, simulation_onsager_magnetization_Js, mavg, mstd/2; color, whiskerwidth=5)
 	end
 	Makie.axislegend(ax, position=:rb)
 	Makie.resize_to_layout!(fig)
@@ -1803,7 +1803,7 @@ version = "3.6.0+0"
 # ╠═1d829ba6-d42e-4a8b-84b5-3b88dabd3817
 # ╠═43821996-dfa0-481a-a5ea-23c42d931da2
 # ╟─ffa8b4c4-c3ab-4b50-aca9-36c2b2e07c66
-# ╠═6f6e8f13-ceda-46d8-9dff-87fc7249a2e8
+# ╟─6f6e8f13-ceda-46d8-9dff-87fc7249a2e8
 # ╠═d7d626f9-8862-4363-a92b-ed1b004ccefe
 # ╠═bcc64250-8eee-445e-9da3-6ca72d827306
 # ╠═a3507b8e-c75c-4406-be24-7f26d6cfd4cf

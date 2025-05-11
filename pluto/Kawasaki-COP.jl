@@ -30,7 +30,7 @@ where the sum goes over pairs of neighboring sites in a lattice. However, in the
 
 $$\sum_i s_i = Nm$$
 
-where $N$ is the total number of sites in the lattice and $-1 \le m \le 1$, the magnetization per site, is now a fixed parameter of the model. The equilibrium Boltzmann probability distribution at temperature $1/\beta$ is given by:
+where $N$ is the total number of sites in the lattice and $-1 \le m \le 1$, the magnetization per site, is now a fixed parameter of the model. The equilibrium Boltzmann probability distribution is given by:
 
 $$P(\mathbf s) = \frac{1}{Z(J,m)} \exp \left(J\sum_{(ij)}s_i s_j \right) \delta\left( \sum_i s_i; Nm \right)$$
 
@@ -111,6 +111,11 @@ function random_lattice(; L1::Int, L2::Int, M::Int)
 	return σ
 end
 
+# ╔═╡ a6b98ea7-590d-4ec6-855a-0e2888801165
+md"""
+Note that swapping two spins of the same sign has no effect. A trick to speed up the simulation, is to keep track of the spins that are up and down, by strong two lists of indices of coordinates in the lattice where positive and negative spins are. We then propose swaps only between a spin pointing up and a spin pointing down.
+"""
+
 # ╔═╡ 6acc3073-b2ec-4074-9bc3-77c12c02dba9
 function periodic(i::Int, L::Int)
     @assert 0 ≤ i ≤ L + 1
@@ -147,39 +152,53 @@ function kawasaki_swap_ΔE(σ::AbstractMatrix{Bool}, i0::CartesianIndex{2}, i1::
 end
 
 # ╔═╡ 599c7eea-52e2-4363-b5de-986a4a942f0c
+# simulate the COP Ising model with the Kawasaki algorithm
+# J is the coupling strength
+# L1, L2 determine the size of the system, a L1 x L2 2-dimensional grid lattice
+# M is the conserved global magnetization
+# steps_between_frames is the number of MC steps to perform between two succesive frames
+# number_of_frames is the number of snapshots of the simulation that we will save for plotting or further analyses
 function kawasaki(J::Real; L1::Int, L2::Int, M::Int, steps_between_frames::Int, number_of_frames::Int)
+	# initialize a random lattice with global magnetization M
 	σ = random_lattice(; L1, L2, M)
 
-	# boundary conditions
+	# ensure boundary conditions
 	σ[:, 1] .= true
 	σ[:, end] .= false
 
+	# initialize array where we will save the snapshots of the simulation
 	trace = falses(L1, L2, number_of_frames)
 	trace[:, :, 1] .= σ
 
-	# keep track of indices of spins that are up and down; remove boundary
+	# keep track of indices of spins that are up and down (remove boundary)
 	spins_0 = filter(i -> 1 < i[2] < L2, findall(!, σ[:, :]))
 	spins_1 = filter(i -> 1 < i[2] < L2, findall(σ[:, :]))
 
 	@progress for f = 2:number_of_frames
 		for t = 1:steps_between_frames
+			# pick a random pair of spins to swap
+			# since swapping spins of same sign has no effect, we pick one spin pointing down and one pointing up
 			idx0 = rand(eachindex(spins_0))
 			idx1 = rand(eachindex(spins_1))
 	
 			i0 = spins_0[idx0]
 			i1 = spins_1[idx1]
-	
+
+			# Compute the delta-energy of swapping these two spins
 			ΔE = J * kawasaki_swap_ΔE(σ, i0, i1)
-	
+
 			if ΔE ≤ 0 || randexp() ≥ ΔE
+				# If the Metropolis condition is satisfied, we perform the swap
 				σ[i0] = 1
 				σ[i1] = 0
-	
+
+				# Update the lists of spins pointing up and down taking into account the swap we just did.
 				spins_0[idx0] = i1
 				spins_1[idx1] = i0
 			end
 		end
 
+		# Save the snapshot
 		trace[:, :, f] .= σ
 	end
 
@@ -1842,6 +1861,7 @@ version = "3.6.0+0"
 # ╟─0dc40c69-c14b-4a45-9bfe-5e50b205927e
 # ╠═aee1f8f4-dfa0-4ead-9ddc-3dc96bed969d
 # ╠═599c7eea-52e2-4363-b5de-986a4a942f0c
+# ╟─a6b98ea7-590d-4ec6-855a-0e2888801165
 # ╠═be769062-9d8c-4267-9388-2010b32be7d5
 # ╠═35820e09-1539-4638-a97e-f1cd95360ce2
 # ╠═20bcf8f6-67e1-4ce6-b0f4-01c4a9d79483

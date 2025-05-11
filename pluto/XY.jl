@@ -86,7 +86,7 @@ values_of_J = [0.5, 1.1, 1.5, 2.5]
 # ╔═╡ 106646ee-49f3-41dd-93ea-be91b96ec706
 simulations = map(values_of_J) do J
 	@info "Simulating J=$J"
-	metropolis(; J, L=300, steps_between_frames=4_000, number_of_frames=10_000)
+	metropolis(; J, L=300, steps_between_frames=2_000, number_of_frames=10_000)
 end
 
 # ╔═╡ 206657e7-4c1b-417a-a683-62d53343d899
@@ -97,7 +97,7 @@ To check that our simulations have equilibrated, we can inspect the evolution so
 # ╔═╡ bdc4b58d-dc6e-4c16-b8e8-a56982d0b66f
 let fig = Makie.Figure()
 	for (n, (J, sim)) = enumerate(zip(values_of_J, simulations))
-		ax = Makie.Axis(fig[n,1]; width=600, height=150, xlabel="time", ylabel="energy per spin")
+		ax = Makie.Axis(fig[n,1]; width=600, height=150, xlabel="time", ylabel="energy per spin", title="J = $J")
 		Makie.lines!(ax, [energy(sim[:,:,t]) / length(sim[:,:,t]) for t = axes(sim, 3)])
 	end
 	Makie.resize_to_layout!(fig)
