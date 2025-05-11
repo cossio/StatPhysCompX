@@ -24,6 +24,10 @@ We consider the XY model defined on a 2-dimensional grid lattice. Each site is o
 $$H = -J\sum_{(ij)} \cos(\theta_i - \theta_j)$$
 
 where the sum traverses pairs of adjacent spins $(ij)$ in the grid.
+
+The model exhibits a phase transition, where for high values of $J$ (equivalently, low temperatures), paired couples of *vortices* appear. If one attaches an arrow to every spin pointing in the direction indicated by the angle $\theta_i$, then a vortex is a point in the plane such that all neighboring spins point away from it. If one draws a small circle around a vortex, the angles $\theta_i$ of the spins on the circunference traverse the full range, from $0$ to $2\pi$.
+
+We will simulate this model using the Metropolis algorithm (like for the Ising model).
 """
 
 # ╔═╡ c00cf3bc-2e5d-11f0-31b7-154275ae7ccc
@@ -81,7 +85,7 @@ function metropolis(; J::Real, L::Int, steps_between_frames::Int, number_of_fram
 end
 
 # ╔═╡ 556397ba-d25f-48f0-bd8b-f47363ca9611
-values_of_J = [0.5, 1.1, 1.5, 2.5]
+values_of_J = [0.5, 1, 3, 4]
 
 # ╔═╡ 106646ee-49f3-41dd-93ea-be91b96ec706
 simulations = map(values_of_J) do J
@@ -119,6 +123,26 @@ let fig = Makie.Figure()
 	    	tb = Makie.Colorbar(fig[1:2,3], hm; label = "Angle (rad)", ticks = (0:π/2:2π, ["0", "π/2", "π", "3π/2", "2π"]))
 		end
 	end
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 4cbc810c-862c-465d-a815-2df6c2efe43e
+md"""
+Vortices correspond to points in the plane where colors of the full spectrum (corresponding to the angle) meet. We can use another representation of the lattice, where we attach an arrow to each spin that points in the direction corresponding to the angle $\theta_i$. We focus on a smaller portion of the lattice, say $120 \times 120$. An example of a vortex is highlighted with a red square.
+"""
+
+# ╔═╡ 6ca50c3d-c956-46a0-ab39-8b2c024a6a51
+let fig = Makie.Figure()
+	@assert length(simulations) == length(values_of_J) == 4 # we will make a 2x2 grid
+	n = 4
+	J = values_of_J[n]
+	spins = simulations[n][1:120, 1:120, 10_000]
+	L1, L2 = size(spins)
+	ax = Makie.Axis(fig[1,1]; title = "J = $J", width=900, height=900)
+	Makie.arrows!(ax, 1:120, 1:120, 0.9cos.(spins), 0.9sin.(spins); linewidth=1, arrowsize=5, arrowcolor=vec(spins), linecolor=vec(spins))
+	Makie.poly!([Makie.Rect(47, 84, 10, 10)]; color=:transparent, strokecolor=:red, strokewidth=3, linestyle=:dash)
+
 	Makie.resize_to_layout!(fig)
 	fig
 end
@@ -1643,7 +1667,7 @@ version = "3.6.0+0"
 
 # ╔═╡ Cell order:
 # ╟─a7b42501-7c59-49d3-8747-2f3d9b571df8
-# ╠═33ff2d1c-7a38-47fa-92cb-e5781f3b4a1c
+# ╟─33ff2d1c-7a38-47fa-92cb-e5781f3b4a1c
 # ╠═c00cf3bc-2e5d-11f0-31b7-154275ae7ccc
 # ╠═63f1b67c-8048-4b77-8fbf-53f9e061927e
 # ╠═16d53aba-03a3-4247-9072-b1703ccd70b9
@@ -1655,5 +1679,7 @@ version = "3.6.0+0"
 # ╟─206657e7-4c1b-417a-a683-62d53343d899
 # ╠═bdc4b58d-dc6e-4c16-b8e8-a56982d0b66f
 # ╠═a0d2eaff-51ea-49b7-90ca-18aa33970d58
+# ╟─4cbc810c-862c-465d-a815-2df6c2efe43e
+# ╠═6ca50c3d-c956-46a0-ab39-8b2c024a6a51
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
