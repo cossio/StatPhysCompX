@@ -122,10 +122,30 @@ let fig = Makie.Figure()
 	Random.seed!(10)
 	bins = -7:0.1:7
 	ax = Makie.Axis(fig[1,1], width=700, height=300, xlabel="n", ylabel="x")
-	Makie.hist!(ax, rand(Distributions.Cauchy(), 10^6); color=:gray, label="Cauchy samples", normalization=:pdf, bins)
+	Makie.hist!(ax, rand(Distributions.Cauchy(), 10^6); color=:gray, label="Cauchy samples (n=1)", normalization=:pdf, bins)
 	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Cauchy(), 10^4, 10^2); dims=2); dims=2); normalization=:pdf, bins, linewidth=5, color=:blue, label="Sample average (n=100)")
 	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Cauchy(), 10^4, 10^3); dims=2); dims=2); normalization=:pdf, bins, linewidth=3, color=:red, label="Sample average (n=1000)")
 	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Cauchy(), 10^4, 10^4); dims=2); dims=2); normalization=:pdf, bins, linewidth=2, color=:orange, label="Sample average (n=10000)")
+	Makie.axislegend(ax; position=:rt)
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 5b4c1804-229c-40ef-bd4b-b3b5551c09f5
+md"""
+Let's compare that to the distribution of the sample average of samples from a normal distribution. In contrast to the Cauchy case, the sample average of a Normal distribution quickly concentrates as $n$ increases.
+"""
+
+# ╔═╡ b094a9d8-266d-4a7d-a17f-3120a8f148ce
+let fig = Makie.Figure()
+	Random.seed!(10)
+	bins = -2.5:0.01:2.5
+	ax = Makie.Axis(fig[1,1], width=700, height=300, xlabel="n", ylabel="x")
+	Makie.hist!(ax, rand(Distributions.Normal(), 10^6); color=:gray, label="Normal samples (n=1)", normalization=:pdf, bins)
+	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Normal(), 10^5, 10); dims=2); dims=2); normalization=:pdf, bins, linewidth=2, color=:blue, label="Sample average (n=10)")
+	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Normal(), 10^5, 100); dims=2); dims=2); normalization=:pdf, bins, linewidth=2, color=:orange, label="Sample average (n=100)")
+	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Normal(), 10^5, 1000); dims=2); dims=2); normalization=:pdf, bins, linewidth=2, color=:red, label="Sample average (n=1000)")
+	Makie.ylims!(ax, 0, 2)
 	Makie.axislegend(ax; position=:rt)
 	Makie.resize_to_layout!(fig)
 	fig
@@ -1664,5 +1684,7 @@ version = "3.6.0+0"
 # ╟─51087952-cf4d-4934-81b2-a169cc97f49e
 # ╠═db0512f2-b0c1-4554-8ef0-e6ab31b1fd7d
 # ╟─fd99b96d-7896-4dcd-8207-e34867b82068
+# ╟─5b4c1804-229c-40ef-bd4b-b3b5551c09f5
+# ╠═b094a9d8-266d-4a7d-a17f-3120a8f148ce
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
