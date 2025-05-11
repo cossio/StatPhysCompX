@@ -47,9 +47,7 @@ simply counts how many of the $X_i$ are equal to 1. The count $Y_n$ has a binomi
 
 $$P(Y_n = y) = \binom{n}{y} 2^{-n}$$
 
-with mean $\mathbb E Y_n = n/2$.
-
-According to the CLT, the distribution of $Y_n / \sqrt{n} - \sqrt{n}/2$ approaches the normal distribution of zero mean and variance $1/4$.
+with mean $\mathbb E Y_n = n/2$ and variance $n/4$.
 """
 
 # ╔═╡ 3b1320af-6782-4bd4-8f66-5bb50d88d0f5
@@ -59,26 +57,45 @@ First let's see how well the binomial distribution fits the empirical histogram 
 
 # ╔═╡ 61381cfb-28f5-4299-9855-9d85f887996b
 let fig = Makie.Figure()
-	ax = Makie.Axis(fig[1,1], width=400, height=200)
-	Makie.hist!(ax, dropdims(sum(rand(1000, 10) .< 0.5; dims=2); dims=2); normalization=:pdf, bins=0:10, label="Y_n")
-	Makie.scatterlines!(ax, 0.5:10.5, Distributions.pdf.(Distributions.Binomial(10, 0.5), 0:10), color=:black, label="Binomial PDF")
+	# Simulate random binary variables with mean 0.5.
+	X = rand(1000, 5) .< 0.5
+	ax = Makie.Axis(fig[1,1], width=600, height=200)
+	Makie.hist!(ax, dropdims(sum(X; dims=2); dims=2); normalization=:pdf, bins=0:20, label="Y_n (n=5)")
+	Makie.scatterlines!(ax, 0.5:20.5, Distributions.pdf.(Distributions.Binomial(5, 0.5), 0:20), color=:black, label="Binomial (n=5, p=0.5)")
 	Makie.axislegend(ax; position=:rt)
+
+	X = rand(1000, 10) .< 0.5
+	ax = Makie.Axis(fig[2,1], width=600, height=200)
+	Makie.hist!(ax, dropdims(sum(X; dims=2); dims=2); normalization=:pdf, bins=0:20, label="Y_n (n=10)")
+	Makie.scatterlines!(ax, 0.5:20.5, Distributions.pdf.(Distributions.Binomial(10, 0.5), 0:20), color=:black, label="Binomial (n=10, p=0.5)")
+	Makie.axislegend(ax; position=:rt)
+	
+	X = rand(1000, 20) .< 0.5
+	ax = Makie.Axis(fig[3,1], width=600, height=200)
+	Makie.hist!(ax, dropdims(sum(X; dims=2); dims=2); normalization=:pdf, bins=0:20, label="Y_n (n=20)")
+	Makie.scatterlines!(ax, 0.5:20.5, Distributions.pdf.(Distributions.Binomial(20, 0.5), 0:20), color=:black, label="Binomial (n=20, p=0.5)")
+	Makie.axislegend(ax; position=:rt)
+
 	Makie.resize_to_layout!(fig)
 	fig
 end
 
-# ╔═╡ 907ce6b7-5f24-47b6-ad9f-76a5f14c0914
+# ╔═╡ 56e9bac4-1092-4ce1-bb52-1949bc4fae6c
 md"""
-Now, let's test the CLT.
+Let $\overline{X_n} = Y_n/n$ be the sample mean. According to the CLT, the distribution of $\sqrt{n} (\overline{X_n} - 1/2)$ approaches the normal distribution of zero mean and variance $1/4$.
+
+The plot below shows the comparison. The fit gets better very quickly as $n$ increases.
 """
 
 # ╔═╡ ae79ef6a-c228-47b4-924a-79537ac18caf
 let fig = Makie.Figure()
-	ax = Makie.Axis(fig[1,1], width=400, height=300)
-	for n = [100, 1000, 10000]
-		#Makie.hist!(ax, dropdims(sum(rand(1000, n) .< 0.5; dims=2) / sqrt(n) .- sqrt(n)/2; dims=2); normalization=:pdf, bins=-3:0.1:3, label="n=$n")
-		Makie.lines!(ax, (0:n) ./ sqrt(n) .- sqrt(n)/2, Distributions.pdf.(Distributions.Binomial(10, 0.5), 0:n), label="Binomial $n")
+	ax = Makie.Axis(fig[1,1], width=600, height=500)
+	for n = [3, 5, 10, 20]
+		Y = 0:n
+		Makie.scatterlines!(ax, sqrt(n) .* (Y./n .- 1/2), sqrt(n) * Distributions.pdf.(Distributions.Binomial(n, 0.5), Y), label="Binomial $n")
 	end
+	Makie.lines!(ax, -2:0.01:2, Distributions.pdf.(Distributions.Normal(0, 0.5), -2:0.01:2); label="Normal(0, 1/2)", linestyle=:dash, linewidth=1, color=:black)
+	Makie.xlims!(ax, -2, 2)
 
 	#akie.lines!(ax, -3:0.01:3, Distributions.pdf.(Distributions.Normal(0, 1/2), -3:0.01:3), color=:black, label="Normal PDF", linewidth=3)
 	#Makie.xlims!(ax, -2, 2)
@@ -1663,7 +1680,7 @@ version = "3.6.0+0"
 # ╟─13c762f1-e000-487a-81bd-b025d8f0764c
 # ╟─3b1320af-6782-4bd4-8f66-5bb50d88d0f5
 # ╠═61381cfb-28f5-4299-9855-9d85f887996b
-# ╠═907ce6b7-5f24-47b6-ad9f-76a5f14c0914
+# ╟─56e9bac4-1092-4ce1-bb52-1949bc4fae6c
 # ╠═ae79ef6a-c228-47b4-924a-79537ac18caf
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
