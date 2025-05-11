@@ -42,7 +42,7 @@ Pluto.run()
 
 This will open a web browser with the Pluto interface. You can create a new notebook by clicking on the "New notebook" button. You can also open an existing notebook by clicking on the "Open notebook" button and selecting the notebook file.
 
-# Contents
+## Contents
 
 The following links point to Pluto notebooks. Clicking on a link will open a web page with a static version of the notebook. To run the notebook interactively in your computer and edit the code, you can click on the "Edit or run this notebook" button in the top right corner of the page. Then click the button where it says "Download this notebook" and save the file in your computer. Finally, open the notebook in Pluto to run it.
 
@@ -50,6 +50,7 @@ The following links point to Pluto notebooks. Clicking on a link will open a web
 - The central limit theorem: https://cossio.github.io/StatPhysCompX/pluto_html/CLT.html.
 - Simulations of the 2D Ising model with the Metropolis algorithm: https://cossio.github.io/StatPhysCompX/pluto_html/Ising-Metropolis.html.
 - Conserved order-parameter Ising model with the Kawasaki algorithm: https://cossio.github.io/StatPhysCompX/pluto_html/Kawasaki-COP.html.
+- XY model: https://cossio.github.io/StatPhysCompX/pluto_html/XY.html.
 
 Other resources in Julia:
 
