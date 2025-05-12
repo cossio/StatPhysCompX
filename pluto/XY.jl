@@ -10,6 +10,9 @@ using ProgressLogging: @progress
 # ╔═╡ 16d53aba-03a3-4247-9072-b1703ccd70b9
 using Random: randexp
 
+# ╔═╡ c0ccd364-25af-4e23-85fa-4c72a750d19b
+using Statistics: mean, std
+
 # ╔═╡ a7b42501-7c59-49d3-8747-2f3d9b571df8
 md"""
 # XY model
@@ -147,6 +150,39 @@ let fig = Makie.Figure()
 	fig
 end
 
+# ╔═╡ f414aaa3-e770-40e7-b4bb-232c30850e7f
+function helicity_modulus(spins::AbstractMatrix; J::Float64=1.0)
+    L1, L2 = size(spins)
+	N = L1 * L2
+    E_x = 0.0
+    M_x = 0.0
+    # Sum along x bonds
+    for i in 1:L1, j in 1:L2
+        θ = spins[i, j]
+        θ_r = spins[i, mod1(j + 1, L2)]
+        E_x += cos(θ - θ_r)
+        M_x += sin(θ - θ_r)
+    end
+    # Helmholtz free energy second derivative
+    return (J * E_x - J^2 * M_x^2) / N
+end
+
+# ╔═╡ 6ebfed78-63fc-4b5d-9165-ba642492d599
+helicity_moduli = [[helicity_modulus(sim[:,:,t]) for t = axes(sim, 3)] for sim = simulations]
+
+# ╔═╡ 12a45557-3bc7-42b0-8ba0-667de17daf2b
+let fig = Makie.Figure()
+	for (n, sim, helix, J) = zip(eachindex(simulations), simulations, helicity_moduli, values_of_J)
+		ax = Makie.Axis(fig[n,1]; width=500, height=150, title="J = $J")
+		Makie.hist!(ax, helix; normalization=:pdf)
+	end
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 8381a352-1c69-44e7-9363-5a7edfd5f15c
+map(mean, helicity_moduli)
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -154,6 +190,7 @@ CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 ProgressLogging = "33c8b6b6-d38a-422a-b730-caa89a2f386c"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
 CairoMakie = "~0.13.4"
@@ -167,7 +204,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "2d6cc006720e62190689f405eac31f6f1438bcd6"
+project_hash = "c54dacf8f6db84a253af72e92c8f41f509cd6009"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1671,6 +1708,7 @@ version = "3.6.0+0"
 # ╠═c00cf3bc-2e5d-11f0-31b7-154275ae7ccc
 # ╠═63f1b67c-8048-4b77-8fbf-53f9e061927e
 # ╠═16d53aba-03a3-4247-9072-b1703ccd70b9
+# ╠═c0ccd364-25af-4e23-85fa-4c72a750d19b
 # ╠═890a57be-5f41-43d0-b26f-f8978720b6dd
 # ╠═23b5b6a6-e433-405e-9241-7022953dbb80
 # ╠═d4e0ee8b-dae4-4ba5-9a02-51d896707920
@@ -1681,5 +1719,9 @@ version = "3.6.0+0"
 # ╠═a0d2eaff-51ea-49b7-90ca-18aa33970d58
 # ╟─4cbc810c-862c-465d-a815-2df6c2efe43e
 # ╠═6ca50c3d-c956-46a0-ab39-8b2c024a6a51
+# ╠═f414aaa3-e770-40e7-b4bb-232c30850e7f
+# ╠═6ebfed78-63fc-4b5d-9165-ba642492d599
+# ╠═12a45557-3bc7-42b0-8ba0-667de17daf2b
+# ╠═8381a352-1c69-44e7-9363-5a7edfd5f15c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
