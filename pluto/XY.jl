@@ -28,13 +28,13 @@ $$H = -J\sum_{(ij)} \cos(\theta_i - \theta_j)$$
 
 where the sum traverses pairs of adjacent spins $(ij)$ in the grid.
 
-The model exhibits a phase transition, where for high values of $J$ (equivalently, low temperatures), paired couples of *vortices* appear. If one attaches an arrow to every spin pointing in the direction indicated by the angle $\theta_i$, then a vortex is a point in the plane such that all neighboring spins point away from it. If one draws a small circle around a vortex, the angles $\theta_i$ of the spins on the circunference traverse the full range, from $0$ to $2\pi$.
+The model exhibits a phase transition, where for high values of $J$ (equivalently, low temperatures), paired couples of *vortices* appear. If one attaches an arrow to every spin pointing in the direction indicated by the angle $\theta_i$, then a vortex is a point in the plane such that neighboring are ``spiraling'' towards it (or away from it, for an anti-vortex). If one draws a small circle around a vortex, the angles $\theta_i$ of the spins on the circunference traverse the full range, from $0$ to $2\pi$.
 
 We will simulate this model using the Metropolis algorithm (like for the Ising model).
 """
 
 # ╔═╡ c00cf3bc-2e5d-11f0-31b7-154275ae7ccc
-import Makie, CairoMakie
+import Makie, CairoMakie, Random
 
 # ╔═╡ 890a57be-5f41-43d0-b26f-f8978720b6dd
 # Compute the total energy of the lattice, with periodic boundary conditions.
@@ -92,8 +92,9 @@ values_of_J = [0.5, 1, 3, 4]
 
 # ╔═╡ 106646ee-49f3-41dd-93ea-be91b96ec706
 simulations = map(values_of_J) do J
+	Random.seed!(1) # reproducibility
 	@info "Simulating J=$J"
-	metropolis(; J, L=300, steps_between_frames=2_000, number_of_frames=10_000)
+	Float32.(metropolis(; J, L=300, steps_between_frames=2_000, number_of_frames=10_000))
 end
 
 # ╔═╡ 206657e7-4c1b-417a-a683-62d53343d899
@@ -132,7 +133,9 @@ end
 
 # ╔═╡ 4cbc810c-862c-465d-a815-2df6c2efe43e
 md"""
-Vortices correspond to points in the plane where colors of the full spectrum (corresponding to the angle) meet. We can use another representation of the lattice, where we attach an arrow to each spin that points in the direction corresponding to the angle $\theta_i$. We focus on a smaller portion of the lattice, say $120 \times 120$. An example of a vortex is highlighted with a red square.
+The energy is minimized when all spins point in the same direction. We see in the previous figures that, as the temperature is lowered, regions of neighboring spins tend to align (so we see that near spins have the same color, which corresponds to the angle).
+
+Vortices correspond to points in the plane where colors of the full spectrum (corresponding to the angle) meet. We can use another representation of the lattice, where we attach an arrow to each spin that points in the direction corresponding to the angle $\theta_i$. We focus on a smaller portion of the lattice, say $120 \times 120$. If we are lucky we can see some vortices appear.
 """
 
 # ╔═╡ 6ca50c3d-c956-46a0-ab39-8b2c024a6a51
@@ -144,11 +147,21 @@ let fig = Makie.Figure()
 	L1, L2 = size(spins)
 	ax = Makie.Axis(fig[1,1]; title = "J = $J", width=900, height=900)
 	Makie.arrows!(ax, 1:120, 1:120, 0.9cos.(spins), 0.9sin.(spins); linewidth=1, arrowsize=5, arrowcolor=vec(spins), linecolor=vec(spins))
-	Makie.poly!([Makie.Rect(47, 84, 10, 10)]; color=:transparent, strokecolor=:red, strokewidth=3, linestyle=:dash)
+	Makie.poly!([Makie.Rect(100, 10, 11, 11)]; color=:transparent, strokecolor=:red, strokewidth=3, linestyle=:dash)
+	Makie.poly!([Makie.Rect(85, 8, 11, 11)]; color=:transparent, strokecolor=:blue, strokewidth=3, linestyle=:dash)
 
 	Makie.resize_to_layout!(fig)
 	fig
 end
+
+# ╔═╡ f73a3b15-2b4e-42f1-99f9-5bbfce39a32f
+md"""
+At a vortex spins are far from being aligned, and thus vortices come at an energy cost. Isolated vortices are topological defects. It is impossible to apply a continuous rotation to all the spins near a vortex to align them and bring them to a ground state configuration.
+
+To counteract this energy cost, at low temperatures vortices couple to anti-vortices, forming vortex-antivortex pairs. Arrows flowing away from an antivortex flow towards a near vortex. The figure above shows an example (in blue and red squares), which are coupled in the sense that following the arrows leaving one of the two vortices brings us to the other vortex. Such coupled vortex pairs can come together and ``annihilate'' each other.
+
+The Kosterlitz–Thouless transition characterizes the emergence of these bound pairs of vortices. It was one of the earliest examples of a *topological phase transition*, described by Berezinskii, Kosterlitz, and Thouless in the 70s.
+"""
 
 # ╔═╡ f414aaa3-e770-40e7-b4bb-232c30850e7f
 function helicity_modulus(spins::AbstractMatrix; J::Float64=1.0)
@@ -164,7 +177,7 @@ function helicity_modulus(spins::AbstractMatrix; J::Float64=1.0)
         M_x += sin(θ - θ_r)
     end
     # Helmholtz free energy second derivative
-    return (J * E_x - J^2 * M_x^2) / N
+    return (E_x - J * M_x^2) * J / N
 end
 
 # ╔═╡ 6ebfed78-63fc-4b5d-9165-ba642492d599
@@ -174,14 +187,11 @@ helicity_moduli = [[helicity_modulus(sim[:,:,t]) for t = axes(sim, 3)] for sim =
 let fig = Makie.Figure()
 	for (n, sim, helix, J) = zip(eachindex(simulations), simulations, helicity_moduli, values_of_J)
 		ax = Makie.Axis(fig[n,1]; width=500, height=150, title="J = $J")
-		Makie.hist!(ax, helix; normalization=:pdf)
+		Makie.hist!(ax, helix; normalization=:pdf, bins=-15:5)
 	end
 	Makie.resize_to_layout!(fig)
 	fig
 end
-
-# ╔═╡ 8381a352-1c69-44e7-9363-5a7edfd5f15c
-map(mean, helicity_moduli)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1719,9 +1729,9 @@ version = "3.6.0+0"
 # ╠═a0d2eaff-51ea-49b7-90ca-18aa33970d58
 # ╟─4cbc810c-862c-465d-a815-2df6c2efe43e
 # ╠═6ca50c3d-c956-46a0-ab39-8b2c024a6a51
+# ╠═f73a3b15-2b4e-42f1-99f9-5bbfce39a32f
 # ╠═f414aaa3-e770-40e7-b4bb-232c30850e7f
 # ╠═6ebfed78-63fc-4b5d-9165-ba642492d599
 # ╠═12a45557-3bc7-42b0-8ba0-667de17daf2b
-# ╠═8381a352-1c69-44e7-9363-5a7edfd5f15c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

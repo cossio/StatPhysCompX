@@ -42,6 +42,8 @@ A single particle performing a Brownian motion in the box will, for long times, 
 # ╔═╡ 7bbc9461-0968-4e74-b133-60f7e0a249b6
 md"""
 In this notebook we will simulate the diffusion of a population of particles in a box. To see diffusion in action, we will initialize their positions to be confined to a corner of the box, and see how they diffuse to eventually occupy the entire box.
+
+Note that the simulation is highly simplified. We do not consider interactions between particles, such as collisions, and each time step a particle moves in a random direction (thus neglecting inertia).
 """
 
 # ╔═╡ a8b940e4-2d03-4c2d-b8cb-2e4a69cf8cd6
@@ -154,6 +156,11 @@ simulations = map(diffusion_rates) do D
 	sim, collision_cnt = simulate_diffusion(; N, L, steps, dt, D)
 	return (; sim, collision_cnt)
 end
+
+# ╔═╡ 2a8ed101-7899-4f3b-93fa-30106fc4e7ec
+md"""
+According to the ideal gas law, the energy of the particles is proportional to the pressure. We can test this in the simple simulation we have set up.
+"""
 
 # ╔═╡ 0c676fe4-e119-4aea-8822-b552f4532d4c
 let fig = Makie.Figure()
@@ -1727,6 +1734,7 @@ version = "3.5.0+0"
 # ╠═036298dd-2012-4589-8151-b92cdec66528
 # ╠═42cdc42e-adfe-40f9-9da9-2d75d4e053b4
 # ╠═df2d425b-0953-485a-babd-f19aa8474285
+# ╠═2a8ed101-7899-4f3b-93fa-30106fc4e7ec
 # ╠═0c676fe4-e119-4aea-8822-b552f4532d4c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
