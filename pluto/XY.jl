@@ -163,36 +163,6 @@ To counteract this energy cost, at low temperatures vortices couple to anti-vort
 The Kosterlitz–Thouless transition characterizes the emergence of these bound pairs of vortices. It was one of the earliest examples of a *topological phase transition*, described by Berezinskii, Kosterlitz, and Thouless in the 70s.
 """
 
-# ╔═╡ f414aaa3-e770-40e7-b4bb-232c30850e7f
-function helicity_modulus(spins::AbstractMatrix; J::Float64=1.0)
-    L1, L2 = size(spins)
-	N = L1 * L2
-    E_x = 0.0
-    M_x = 0.0
-    # Sum along x bonds
-    for i in 1:L1, j in 1:L2
-        θ = spins[i, j]
-        θ_r = spins[i, mod1(j + 1, L2)]
-        E_x += cos(θ - θ_r)
-        M_x += sin(θ - θ_r)
-    end
-    # Helmholtz free energy second derivative
-    return (E_x - J * M_x^2) * J / N
-end
-
-# ╔═╡ 6ebfed78-63fc-4b5d-9165-ba642492d599
-helicity_moduli = [[helicity_modulus(sim[:,:,t]) for t = axes(sim, 3)] for sim = simulations]
-
-# ╔═╡ 12a45557-3bc7-42b0-8ba0-667de17daf2b
-let fig = Makie.Figure()
-	for (n, sim, helix, J) = zip(eachindex(simulations), simulations, helicity_moduli, values_of_J)
-		ax = Makie.Axis(fig[n,1]; width=500, height=150, title="J = $J")
-		Makie.hist!(ax, helix; normalization=:pdf, bins=-15:5)
-	end
-	Makie.resize_to_layout!(fig)
-	fig
-end
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -1730,8 +1700,5 @@ version = "3.6.0+0"
 # ╟─4cbc810c-862c-465d-a815-2df6c2efe43e
 # ╠═6ca50c3d-c956-46a0-ab39-8b2c024a6a51
 # ╟─f73a3b15-2b4e-42f1-99f9-5bbfce39a32f
-# ╠═f414aaa3-e770-40e7-b4bb-232c30850e7f
-# ╠═6ebfed78-63fc-4b5d-9165-ba642492d599
-# ╠═12a45557-3bc7-42b0-8ba0-667de17daf2b
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
