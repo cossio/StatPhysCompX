@@ -4,184 +4,20 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 8c9547ef-e57b-49c1-8d01-f29e9e770c85
-using Statistics: mean
-
-# ╔═╡ 620a3555-c3c5-4948-a4bf-cbfeb7cb2df6
-md"""
-# Law of large numbers
-
-This notebook is part of the computational resources for the Statistical Physics course at École Polytechnique. To return to the main repository, follow this link: [https://github.com/cossio/StatPhysCompX](https://github.com/cossio/StatPhysCompX).
-"""
-
-# ╔═╡ d6a08e60-2dd9-11f0-1d3d-b55463e0946c
-import Makie, CairoMakie
-
-# ╔═╡ 27116e6b-8b98-472d-9a05-45ad7bb85414
-import Distributions, Random
-
-# ╔═╡ 0da16ae1-8a0c-4696-8416-52738fd7fe2a
-md"""
-Let $X_1,\dots,X_n$ be independent and identically distributed copies of a real random variable $X$. Define the sample mean:
-
-$$\overline{X_n} = \frac{1}{n} \sum_{i=1}^{n} X_i$$
-
-Provided $\mathbb{E} X^{2}$ is finite, the weak law of large numbers says that $\overline{X_n}$ converges almost surely to $\mu=\mathbb{E}X$ as $N$ grows.
-
-To make this more precise, we compute the variance of $\overline{X_n}$ as follows:
-
-$$\mathbb{E}(\overline{X_n} - \mu)^{2} = \frac{1}{n^2} \sum_{i=1}^{n} \mathbb{E}(X_i-\mu)^2 = \frac{1}{n}\sigma^{2}$$
-
-where $\sigma^{2} = \mathbb{E}(X-\mu)^2$ is the variance of $X$, which is finite by assumption. It follows that the variance of $\overline{X_n}$ decays to zero as $n\rightarrow\infty$, at a rate of $1/n$.
-"""
-
-# ╔═╡ 5a10695a-d49f-4ad9-a7e5-d06c4001488f
-md"""
-Let's consider a few examples. We will now sample $X$ from various distributions and verify that the sample mean indeed converges to the mean of $X$.
-
-We will consider the Normal, Beta, T-student and Gamma distributions. The following plots show $n$ samples (in gray) of one of these distributions. The dashed blue line gives the mean of the original random variable, while the red line gives the sample mean $\overline{X_n}$ as a function of $n$. As predicted by the Law of Large Numbers, the sample mean approaches the mean of the random variable as $n$ increases.
-"""
-
-# ╔═╡ 1554c0c2-9c68-4483-bba8-65974fa935d0
-let fig = Makie.Figure()
-	for (n, (d, title)) = enumerate(zip([Distributions.Normal(0,2), Distributions.Beta(3,2), Distributions.TDist(14), Distributions.Gamma(6,3)], ["Normal", "Beta", "T-student", "Gamma"]))
-		x = rand(d, 100)
-		
-		ax = Makie.Axis(fig[n,1]; width=700, height=200, title, xlabel="n", ylabel="x")
-		Makie.stem!(ax, x; color=:gray, label="samples", offset=mean(d), stemcolor=:gray, trunklinestyle=:dash, trunkcolor=:blue)
-		Makie.lines!(ax, cumsum(x) ./ (1:length(x)); color=:red, linewidth=3, label="average")
-		if n == 1
-			Makie.axislegend(ax; position=:rb)
-		end
-	end
-	Makie.resize_to_layout!(fig)
-	fig
-end
-
-# ╔═╡ d7ec4756-7fe5-421e-9e02-7750c0ec00f3
-md"""
-Our proof above that the variance of the sample mean decays to zero as $n$ increases relies on the assumption that $\mathbb E X^2$ is finite. In fact, Kolmogorov proved a stronger version of the law of large numbers, assuming only that $\mathbb E |X|$ was finite.
-
-But what happens if these assumptions are violated?
-
-An interesting example is the Cauchy distribution, which has the density:
-
-$$p(x) = \frac{1}{\pi} \frac{1}{1+x^2}$$
-
-The Cauchy distribution does not have finite moments. In particular, $\mathbb E X^2$ and $\mathbb E |X|$ are both infinite. The assumptions behind the Law of Large Numbers do not hold anymore in this case. What happens if we sample a large number of random variates of the Cauchy distribution and compute the sample mean?
-
-Let's repeat the above experiment, but this time using the Cauchy distribution.
-"""
-
-# ╔═╡ fb52f5ee-efa6-4c92-90d6-e7438de0579d
-let fig = Makie.Figure()
-	Random.seed!(10)
-	d = Distributions.Cauchy()
-	x = rand(d, 500)
-	ax = Makie.Axis(fig[1,1]; width=1000, height=300, title="Cauchy distribution", xlabel="n", ylabel="x")
-	Makie.stem!(ax, x; color=:gray, label="samples", offset=0, stemcolor=:gray, trunklinestyle=:dash, trunkcolor=:blue)
-	Makie.lines!(ax, cumsum(x) ./ (1:length(x)); color=:red, linewidth=3, label="average")
-	Makie.axislegend(ax; position=:rb)
-	Makie.resize_to_layout!(fig)
-	fig
-end
-
-# ╔═╡ faed88b5-e1bb-4c9b-a41c-cf3739776384
-md"""
-Notice that the Cauchy distribution allows for extremely large fluctuations. In the previous plots, these large fluctuations are hiding the behavior of the sample mean. So let's zoom in the behavior of the sample mean alone, for increasing values of $n$. And let's compare that to one of the example distributions above for which the law of large numbers applied, e.g. the Normal distribution.
-
-We now plot $n$ in a logarithmic scale to make the fluctuations of the sample mean apparent even at very large values of $n$.
-"""
-
-# ╔═╡ fd48972a-f55f-46ea-b06a-728ec8f811b5
-let fig = Makie.Figure()
-	Random.seed!(10)
-	n = 10^6
-	x_Cauchy = rand(Distributions.Cauchy(), n)
-	x_Normal = rand(Distributions.Normal(), n)
-	ax = Makie.Axis(fig[1,1], width=700, height=200, xlabel="n", ylabel="x", xscale=log10)
-	Makie.lines!(ax, cumsum(x_Cauchy) ./ (1:length(x_Cauchy)); color=:red, linewidth=2, label="Cauchy")
-	Makie.lines!(ax, cumsum(x_Normal) ./ (1:length(x_Normal)); color=:blue, linewidth=2, label="Normal")
-	Makie.axislegend(ax; position=:rb)
-	Makie.resize_to_layout!(fig)
-	fig
-end
-
-# ╔═╡ 51087952-cf4d-4934-81b2-a169cc97f49e
-md"""
-In contrast to the normal distribution, the sample mean of the Cauchy distribution continues to exhibit significant fluctuations even for very large $n$.
-
-In fact, one can show that for the Cauchy distribution, the sample mean follows the exact same distribution as the individual terms. To see this, note that the characteristic function of the Cauchy distribution is given by:
-
-$$f(t) = \mathbb E e^{itX} = e^{-|t|}$$
-
-Now consider the characteristic function of the sample mean:
-
-$$\mathbb E e^{it\overline{X_n}}
-= \mathbb E \exp\left\{ it \frac{1}{n}\sum_i X_i \right\}
-= \prod_i \mathbb E \exp\left\{ it X_i/n \right\}
-= f(t/n)^{n}$$
-
-But we can verify that $f(t/n)^{n}=f(t)$ for the Cauchy distribution. Thus the sample mean $\overline{X_n}$ has the *same* Cauchy distribution as the individual $X_i$.
-"""
-
-# ╔═╡ db0512f2-b0c1-4554-8ef0-e6ab31b1fd7d
-let fig = Makie.Figure()
-	Random.seed!(10)
-	bins = -7:0.1:7
-	ax = Makie.Axis(fig[1,1], width=700, height=300, xlabel="n", ylabel="x")
-	Makie.hist!(ax, rand(Distributions.Cauchy(), 10^6); color=:gray, label="Cauchy samples (n=1)", normalization=:pdf, bins)
-	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Cauchy(), 10^4, 10^2); dims=2); dims=2); normalization=:pdf, bins, linewidth=5, color=:blue, label="Sample average (n=100)")
-	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Cauchy(), 10^4, 10^3); dims=2); dims=2); normalization=:pdf, bins, linewidth=3, color=:red, label="Sample average (n=1000)")
-	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Cauchy(), 10^4, 10^4); dims=2); dims=2); normalization=:pdf, bins, linewidth=2, color=:orange, label="Sample average (n=10000)")
-	Makie.axislegend(ax; position=:rt)
-	Makie.resize_to_layout!(fig)
-	fig
-end
-
-# ╔═╡ fd99b96d-7896-4dcd-8207-e34867b82068
-md"""
-The Cauchy distribution exhibits a very different behavior than what one would expect from the law of large numbers!
-"""
-
-# ╔═╡ 5b4c1804-229c-40ef-bd4b-b3b5551c09f5
-md"""
-Let's compare that to the distribution of the sample average of samples from a normal distribution. In contrast to the Cauchy case, the sample average of a Normal distribution quickly concentrates as $n$ increases.
-"""
-
-# ╔═╡ b094a9d8-266d-4a7d-a17f-3120a8f148ce
-let fig = Makie.Figure()
-	Random.seed!(10)
-	bins = -2.5:0.01:2.5
-	ax = Makie.Axis(fig[1,1], width=700, height=300, xlabel="n", ylabel="x")
-	Makie.hist!(ax, rand(Distributions.Normal(), 10^6); color=:gray, label="Normal samples (n=1)", normalization=:pdf, bins)
-	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Normal(), 10^5, 10); dims=2); dims=2); normalization=:pdf, bins, linewidth=2, color=:blue, label="Sample average (n=10)")
-	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Normal(), 10^5, 100); dims=2); dims=2); normalization=:pdf, bins, linewidth=2, color=:orange, label="Sample average (n=100)")
-	Makie.stephist!(ax, dropdims(mean(rand(Distributions.Normal(), 10^5, 1000); dims=2); dims=2); normalization=:pdf, bins, linewidth=2, color=:red, label="Sample average (n=1000)")
-	Makie.ylims!(ax, 0, 2)
-	Makie.axislegend(ax; position=:rt)
-	Makie.resize_to_layout!(fig)
-	fig
-end
-
-# ╔═╡ 564296c6-5aa4-4d3d-9c1e-417ed6ab3ef1
-md"""
-The assumption that $X$ has bounded moments is indeed important for the validity of the LLN.
-"""
+# ╔═╡ b63a557c-3043-11f0-01aa-7fcf05f954cd
+import PlutoUI, Makie, CairoMakie
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 CairoMakie = "~0.13.4"
-Distributions = "~0.25.119"
 Makie = "~0.22.4"
+PlutoUI = "~0.7.62"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -190,7 +26,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "451f5314ea983426d21be052b22274aa8ab164b3"
+project_hash = "885fab6cffb811dcb2f24b485a8b80b61d77dac4"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -202,6 +38,12 @@ weakdeps = ["ChainRulesCore", "Test"]
     [deps.AbstractFFTs.extensions]
     AbstractFFTsChainRulesCoreExt = "ChainRulesCore"
     AbstractFFTsTestExt = "Test"
+
+[[deps.AbstractPlutoDingetjes]]
+deps = ["Pkg"]
+git-tree-sha1 = "6e1d2a35f2f90a4bc7c2ed98079b2ba09c35b83a"
+uuid = "6e696c72-6542-2067-7265-42206c756150"
+version = "1.3.2"
 
 [[deps.AbstractTrees]]
 git-tree-sha1 = "2d9c9a55f9c93e8887ad391fbae72f8ef55e1177"
@@ -335,19 +177,15 @@ version = "3.29.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "67e11ee83a43eb71ddc950302c53bf33f0690dfe"
+git-tree-sha1 = "b10d0b65641d57b8b4d5e234446582de5047050d"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.12.1"
-weakdeps = ["StyledStrings"]
-
-    [deps.ColorTypes.extensions]
-    StyledStringsExt = "StyledStrings"
+version = "0.11.5"
 
 [[deps.ColorVectorSpace]]
 deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "Requires", "Statistics", "TensorCore"]
-git-tree-sha1 = "8b3b6f87ce8f65a2b4f857528fd8d70086cd72b1"
+git-tree-sha1 = "a1f44953f2382ebb937d60dafbe2deea4bd23249"
 uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
-version = "0.11.0"
+version = "0.10.0"
 weakdeps = ["SpecialFunctions"]
 
     [deps.ColorVectorSpace.extensions]
@@ -424,9 +262,9 @@ version = "1.11.0"
 
 [[deps.Distributions]]
 deps = ["AliasTables", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "6d8b535fd38293bc54b88455465a1386f8ac1c3c"
+git-tree-sha1 = "3e6d038b77f22791b8e3472b7c633acea1ecac06"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.119"
+version = "0.25.120"
 
     [deps.Distributions.extensions]
     DistributionsChainRulesCoreExt = "ChainRulesCore"
@@ -593,9 +431,9 @@ version = "1.4.1"
 
 [[deps.GeometryBasics]]
 deps = ["EarCut_jll", "Extents", "GeoInterface", "IterTools", "LinearAlgebra", "PrecompileTools", "Random", "StaticArrays"]
-git-tree-sha1 = "31dc5dad1ede44c2f417ee7a2320b1966700c512"
+git-tree-sha1 = "2670cf32dcf0229c9893b895a9afe725edb23545"
 uuid = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
-version = "0.5.8"
+version = "0.5.9"
 
 [[deps.Gettext_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "XML2_jll"]
@@ -649,6 +487,24 @@ deps = ["LinearAlgebra", "OpenLibm_jll", "SpecialFunctions"]
 git-tree-sha1 = "68c173f4f449de5b438ee67ed0c9c748dc31a2ec"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.28"
+
+[[deps.Hyperscript]]
+deps = ["Test"]
+git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
+uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
+version = "0.0.5"
+
+[[deps.HypertextLiteral]]
+deps = ["Tricks"]
+git-tree-sha1 = "7134810b1afce04bbc1045ca1985fbe81ce17653"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.5"
+
+[[deps.IOCapture]]
+deps = ["Logging", "Random"]
+git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
+uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+version = "0.2.5"
 
 [[deps.ImageAxes]]
 deps = ["AxisArrays", "ImageBase", "ImageCore", "Reexport", "SimpleTraits"]
@@ -944,6 +800,11 @@ version = "0.3.29"
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 version = "1.11.0"
 
+[[deps.MIMEs]]
+git-tree-sha1 = "c64d943587f7187e751162b3b84445bbbd79f691"
+uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
+version = "1.1.0"
+
 [[deps.MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "oneTBB_jll"]
 git-tree-sha1 = "5de60bc6cb3899cd318d80d627560fae2e2d99ae"
@@ -1102,9 +963,9 @@ version = "10.42.0+1"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "0e1340b5d98971513bddaa6bbed470670cebbbfe"
+git-tree-sha1 = "f07c06228a1c670ae4c87d1276b92c7c597fdda0"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.11.34"
+version = "0.11.35"
 
 [[deps.PNGFiles]]
 deps = ["Base64", "CEnum", "ImageCore", "IndirectArrays", "OffsetArrays", "libpng_jll"]
@@ -1162,6 +1023,12 @@ deps = ["ColorSchemes", "Colors", "Dates", "PrecompileTools", "Printf", "Random"
 git-tree-sha1 = "3ca9a356cd2e113c420f2c13bea19f8d3fb1cb18"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
 version = "1.4.3"
+
+[[deps.PlutoUI]]
+deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
+git-tree-sha1 = "d3de2694b52a01ce61a036f18ea9c0f61c4a9230"
+uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+version = "0.7.62"
 
 [[deps.PolygonOps]]
 git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
@@ -1492,10 +1359,20 @@ git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.11.3"
 
+[[deps.Tricks]]
+git-tree-sha1 = "6cae795a5a9313bbb4f60683f7263318fc7d1505"
+uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
+version = "0.1.10"
+
 [[deps.TriplotBase]]
 git-tree-sha1 = "4d4ed7f294cda19382ff7de4c137d24d16adc89b"
 uuid = "981d1d27-644d-49a2-9326-4793e63143c3"
 version = "0.1.0"
+
+[[deps.URIs]]
+git-tree-sha1 = "cbbebadbcc76c5ca1cc4b4f3b0614b3e603b5000"
+uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
+version = "1.5.2"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
@@ -1631,9 +1508,9 @@ version = "2.0.3+0"
 
 [[deps.libpng_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "068dfe202b0a05b8332f1e8e6b4080684b9c7700"
+git-tree-sha1 = "002748401f7b520273e2b506f61cab95d4701ccf"
 uuid = "b53b4c65-9356-5827-b1ea-8c7a1a84506f"
-version = "1.6.47+0"
+version = "1.6.48+0"
 
 [[deps.libsixel_jll]]
 deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "Libdl", "libpng_jll"]
@@ -1683,22 +1560,6 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─620a3555-c3c5-4948-a4bf-cbfeb7cb2df6
-# ╠═d6a08e60-2dd9-11f0-1d3d-b55463e0946c
-# ╠═27116e6b-8b98-472d-9a05-45ad7bb85414
-# ╠═8c9547ef-e57b-49c1-8d01-f29e9e770c85
-# ╟─0da16ae1-8a0c-4696-8416-52738fd7fe2a
-# ╟─5a10695a-d49f-4ad9-a7e5-d06c4001488f
-# ╠═1554c0c2-9c68-4483-bba8-65974fa935d0
-# ╠═d7ec4756-7fe5-421e-9e02-7750c0ec00f3
-# ╠═fb52f5ee-efa6-4c92-90d6-e7438de0579d
-# ╟─faed88b5-e1bb-4c9b-a41c-cf3739776384
-# ╠═fd48972a-f55f-46ea-b06a-728ec8f811b5
-# ╟─51087952-cf4d-4934-81b2-a169cc97f49e
-# ╠═db0512f2-b0c1-4554-8ef0-e6ab31b1fd7d
-# ╟─fd99b96d-7896-4dcd-8207-e34867b82068
-# ╟─5b4c1804-229c-40ef-bd4b-b3b5551c09f5
-# ╠═b094a9d8-266d-4a7d-a17f-3120a8f148ce
-# ╟─564296c6-5aa4-4d3d-9c1e-417ed6ab3ef1
+# ╠═b63a557c-3043-11f0-01aa-7fcf05f954cd
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
