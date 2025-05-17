@@ -111,46 +111,6 @@ function random_lattice(; L1::Int, L2::Int, M::Int)
 	return σ
 end
 
-# ╔═╡ a6b98ea7-590d-4ec6-855a-0e2888801165
-md"""
-Note that swapping two spins of the same sign has no effect. A trick to speed up the simulation, is to keep track of the spins that are up and down, by strong two lists of indices of coordinates in the lattice where positive and negative spins are. We then propose swaps only between a spin pointing up and a spin pointing down.
-"""
-
-# ╔═╡ 6acc3073-b2ec-4074-9bc3-77c12c02dba9
-function periodic(i::Int, L::Int)
-    @assert 0 ≤ i ≤ L + 1
-    if i < 1
-        return L
-    elseif i > L
-        return 1
-    else
-        return i
-    end
-end
-
-# ╔═╡ 20bcf8f6-67e1-4ce6-b0f4-01c4a9d79483
-# list of neighboring spins
-function neighbors(σ::AbstractMatrix{Bool}, i::CartesianIndex{2})
-	@boundscheck @assert i ∈ CartesianIndices(σ)
-	L1, L2 = size(σ)
-	@assert L1 ≥ 3 && L2 ≥ 3
-	n1 = CartesianIndex(i[1], periodic(i[2] - 1, L2))
-	n2 = CartesianIndex(i[1], periodic(i[2] + 1, L2))
-	n3 = CartesianIndex(periodic(i[1] - 1, L1), i[2])
-	n4 = CartesianIndex(periodic(i[1] + 1, L1), i[2])
-	return (n1, n2, n3, n4)
-end
-
-# ╔═╡ f81c5538-7f0d-4672-a69d-53c0e2dc3601
-# sums across the neighboring spins
-neighbor_sum_spins(σ::AbstractMatrix{Bool}, i::CartesianIndex{2}) = 2 * sum(σ[j] for j = neighbors(σ, i)) - 4
-
-# ╔═╡ 35820e09-1539-4638-a97e-f1cd95360ce2
-# energy cost of swapping spins at sites i0 and i1
-function kawasaki_swap_ΔE(σ::AbstractMatrix{Bool}, i0::CartesianIndex{2}, i1::CartesianIndex{2})
-	return 2 * (σ[i1] - σ[i0]) * (neighbor_sum_spins(σ, i1) - neighbor_sum_spins(σ, i0))
-end
-
 # ╔═╡ 599c7eea-52e2-4363-b5de-986a4a942f0c
 # simulate the COP Ising model with the Kawasaki algorithm
 # J is the coupling strength
@@ -203,6 +163,46 @@ function kawasaki(J::Real; L1::Int, L2::Int, M::Int, steps_between_frames::Int, 
 	end
 
 	return trace
+end
+
+# ╔═╡ a6b98ea7-590d-4ec6-855a-0e2888801165
+md"""
+Note that swapping two spins of the same sign has no effect. A trick to speed up the simulation, is to keep track of the spins that are up and down, by strong two lists of indices of coordinates in the lattice where positive and negative spins are. We then propose swaps only between a spin pointing up and a spin pointing down.
+"""
+
+# ╔═╡ 6acc3073-b2ec-4074-9bc3-77c12c02dba9
+function periodic(i::Int, L::Int)
+    @assert 0 ≤ i ≤ L + 1
+    if i < 1
+        return L
+    elseif i > L
+        return 1
+    else
+        return i
+    end
+end
+
+# ╔═╡ 20bcf8f6-67e1-4ce6-b0f4-01c4a9d79483
+# list of neighboring spins
+function neighbors(σ::AbstractMatrix{Bool}, i::CartesianIndex{2})
+	@boundscheck @assert i ∈ CartesianIndices(σ)
+	L1, L2 = size(σ)
+	@assert L1 ≥ 3 && L2 ≥ 3
+	n1 = CartesianIndex(i[1], periodic(i[2] - 1, L2))
+	n2 = CartesianIndex(i[1], periodic(i[2] + 1, L2))
+	n3 = CartesianIndex(periodic(i[1] - 1, L1), i[2])
+	n4 = CartesianIndex(periodic(i[1] + 1, L1), i[2])
+	return (n1, n2, n3, n4)
+end
+
+# ╔═╡ f81c5538-7f0d-4672-a69d-53c0e2dc3601
+# sums across the neighboring spins
+neighbor_sum_spins(σ::AbstractMatrix{Bool}, i::CartesianIndex{2}) = 2 * sum(σ[j] for j = neighbors(σ, i)) - 4
+
+# ╔═╡ 35820e09-1539-4638-a97e-f1cd95360ce2
+# energy cost of swapping spins at sites i0 and i1
+function kawasaki_swap_ΔE(σ::AbstractMatrix{Bool}, i0::CartesianIndex{2}, i1::CartesianIndex{2})
+	return 2 * (σ[i1] - σ[i0]) * (neighbor_sum_spins(σ, i1) - neighbor_sum_spins(σ, i0))
 end
 
 # ╔═╡ 6dd0b625-9fdb-4435-9641-08b30ed486e4
@@ -261,8 +261,9 @@ let fig = Makie.Figure()
 end
 
 # ╔═╡ 4ce3aed5-6243-431e-ae7f-edd251055094
-# Save a video
 let fig = Makie.Figure()
+	return # comment this line to save a video
+	
 	@assert length(simulations) == length(values_of_J) == 4 # we will make a 2x2 grid in the video
 	L1, L2, nsteps = size(simulations[1])
 
