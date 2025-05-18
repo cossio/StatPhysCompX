@@ -60,3 +60,4 @@ Other resources in Julia:
 External resources:
 
 - XY model: https://kjslag.github.io/XY/.
+- Various simulations from physics: https://phet.colorado.edu/en/simulations/filter?type=html.
