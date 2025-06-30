@@ -58,7 +58,7 @@ The following links point to Pluto notebooks. Clicking on a link will open a web
 
 Other resources in Julia:
 
-- More simulations of the 2D Ising model, with the cluster Wolff algorithm: https://github.com/cossio/IsingModels.jl.
+- Simulations of the 2D Ising model, using the more advanced cluster Wolff algorithm (which is very efficient at or below the critical temperature): https://github.com/cossio/IsingModels.jl.
 
 External resources:
 
