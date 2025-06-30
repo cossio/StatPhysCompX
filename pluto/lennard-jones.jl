@@ -13,6 +13,11 @@ using LinearAlgebra
 # ╔═╡ 9b2c0e18-05c9-4c84-bdd5-616285b78d78
 using Distributions
 
+# ╔═╡ 30336322-5ff8-4e21-8281-41921be9faa8
+md"""
+In this notebook, we will simulate a simple system of particles interacting via a Lennard-Jones potential. We will calculate the radial distribution function and observe the system's different phases (solid, liquid, gas).
+"""
+
 # ╔═╡ 431571ab-0b41-46e3-a01d-58b7e2561eca
 md"""
 This script will:
@@ -1451,8 +1456,9 @@ version = "1.9.2+0"
 # ╠═dc9796f3-4b69-4004-9ed9-b4c9f10160ae
 # ╠═49bbd8bc-494c-4dbc-baa7-e47991b72be0
 # ╠═9b2c0e18-05c9-4c84-bdd5-616285b78d78
-# ╠═431571ab-0b41-46e3-a01d-58b7e2561eca
-# ╠═83d9aa83-03c5-4343-adc7-400b0af82df0
+# ╟─30336322-5ff8-4e21-8281-41921be9faa8
+# ╟─431571ab-0b41-46e3-a01d-58b7e2561eca
+# ╟─83d9aa83-03c5-4343-adc7-400b0af82df0
 # ╠═1773800f-f2ab-49f2-9085-9120536165fb
 # ╠═a3b3fc16-4ead-406f-8b57-f6be8568040c
 # ╠═81b400b3-4842-489b-a145-ab98c154236a
