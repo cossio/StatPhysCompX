@@ -13,6 +13,11 @@ using LinearAlgebra
 # ╔═╡ 9b2c0e18-05c9-4c84-bdd5-616285b78d78
 using Distributions
 
+# ╔═╡ d106acb2-09de-4816-b5ff-42a2bc5fe9be
+md"""
+This notebook is part of the computational resources for the Statistical Physics course at École Polytechnique. To return to the main repository, follow this link: https://github.com/cossio/StatPhysCompX.
+"""
+
 # ╔═╡ 30336322-5ff8-4e21-8281-41921be9faa8
 md"""
 In this notebook, we will simulate a simple system of particles interacting via a Lennard-Jones potential. We will calculate the radial distribution function and observe the system's different phases (solid, liquid, gas).
@@ -1453,10 +1458,11 @@ version = "1.9.2+0"
 """
 
 # ╔═╡ Cell order:
+# ╟─d106acb2-09de-4816-b5ff-42a2bc5fe9be
+# ╟─30336322-5ff8-4e21-8281-41921be9faa8
 # ╠═dc9796f3-4b69-4004-9ed9-b4c9f10160ae
 # ╠═49bbd8bc-494c-4dbc-baa7-e47991b72be0
 # ╠═9b2c0e18-05c9-4c84-bdd5-616285b78d78
-# ╟─30336322-5ff8-4e21-8281-41921be9faa8
 # ╟─431571ab-0b41-46e3-a01d-58b7e2561eca
 # ╟─83d9aa83-03c5-4343-adc7-400b0af82df0
 # ╠═1773800f-f2ab-49f2-9085-9120536165fb
