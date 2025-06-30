@@ -64,3 +64,4 @@ External resources:
 
 - XY model: https://kjslag.github.io/XY/.
 - Various simulations from physics: https://phet.colorado.edu/en/simulations/filter?type=html.
+- MCMC simulation algorithms applied to various systems: https://github.com/npshub/simulation
