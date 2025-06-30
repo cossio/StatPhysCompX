@@ -52,6 +52,7 @@ The following links point to Pluto notebooks. Clicking on a link will open a web
 - Simulations of the 2D Ising model with the Metropolis algorithm: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Ising-Metropolis.html).
 - Conserved order-parameter Ising model with the Kawasaki algorithm: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Kawasaki-COP.html).
 - XY model: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/XY.html).
+- Fermi gases: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/quantum-gasses-fermi.html).
 
 Other resources in Julia:
 
