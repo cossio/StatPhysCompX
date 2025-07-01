@@ -119,9 +119,15 @@ Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%2
 
 <img src="images/bose.svg" alt="Bose-Einstein condensation" width="600">
 
+### Particles in a Lennard-Jones potential
 
+The Lennard-Jones potential is a mathematical model that describes the interaction between a pair of neutral atoms or molecules. It is widely used in molecular dynamics simulations to study the behavior of gases, liquids, and solids.
 
-- Simulation of a simple system of particles interacting via a **Lennard-Jones potential**: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/lennard-jones.html).
+In this notebook, we simulate a simple system of particles interacting via the Lennard-Jones potential. We will calculate the radial distribution function and observe the system's different phases (solid, liquid, gas).
+
+Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/lennard-jones.html).
+
+<img src="images/lennard-jones.svg" alt="Lennard-Jones potential" width="600">
 
 ## Other resources in Julia:
 
