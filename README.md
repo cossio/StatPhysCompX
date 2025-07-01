@@ -141,6 +141,8 @@ This repository contains a Julia implementation of the Wolff algorithm for the 2
 <img src="images/wolff_cluster.png" alt="Typical cluster" width="600">
 
 - The Wolff algorithm is very efficient near or below the critical temperature. But it becomes inefficient above the critical temperature because the typical clusters become very small. In this case, the Metropolis algorithm is more efficient. See: [link](https://cossio.github.io/IsingModels.jl/stable/literate/wolff/#Average-size-of-Wolff's-clusters-as-a-function-of-temperature).
+<img src="images/wolff_size.png" alt="Typical size of clusters" width="600">
+
 
 - Lars Onsager (Nobel Prize 1968) found an exact solution of the 2D Ising model in 1944, in a famous mathematical *tour de force*. We can compare the heat capacity in simulations with the exact expression, see [link](https://cossio.github.io/IsingModels.jl/stable/literate/wolff/#Heat-capacity-vs.-exact-expression). The heat capacity diverges at the critical temperature, which is a hallmark of the phase transition of the model.
 <img src="images/onsager_h.png" alt="Ising model 2D heat capacity" width="600">
