@@ -60,7 +60,7 @@ We simulate a system of independent particles in a box, where each particle perf
 
 Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN-Diffusion.html).
 
-![Diffusion](images/diffusion.png)
+<img src="images/diffusion.png" alt="Diffusion" width="400">
 
 ### Illustrations of central limit theorem
 
