@@ -101,8 +101,15 @@ Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%2
 
 <img src="images/xy.png" alt="XY model" width="600">
 
+### Ideal Fermi gases of non-interacting fermions
 
-- Ideal Fermi gases of non-interacting fermions: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/quantum-gasses-fermi.html).
+The ideal Fermi gas is a model that describes a system of non-interacting fermions, such as electrons in a metal. It is characterized by the Pauli exclusion principle, which states that no two fermions can occupy the same quantum state.
+
+Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/quantum-gasses-fermi.html).
+
+<img src="images/fermi.png" alt="Ideal Fermi gas" width="600">
+
+
 - Bose-Einstein condensation: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/bose-einstein-condensation.html).
 - Simulation of a simple system of particles interacting via a **Lennard-Jones potential**: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/lennard-jones.html).
 
