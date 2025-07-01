@@ -49,7 +49,7 @@ The following links point to Pluto notebooks. Clicking on a link will open a web
 ### Illustrations of the law of large numbers
 Illustrations of the law of large numbers: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN.html).
 
-![alt text](http://url/to/img.png)
+![alt text](https://github.com/cossio/StatPhysCompX/blob/main/images/lln.png)
 
 ### Diffusion in a box and the law of large numbers
 Diffusion in a box and the law of large numbers: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN-Diffusion.html).
