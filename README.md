@@ -52,7 +52,8 @@ The law of large numbers states that as the number of trials increases, the samp
 
 Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN.html).
 
-![Law of large numbers](https://github.com/cossio/StatPhysCompX/blob/main/images/lln.png)
+<img src="images/lln.png" alt="Law of large numbers" width="600">
+
 
 ### Diffusion in a box and the law of large numbers
 
@@ -60,7 +61,7 @@ We simulate a system of independent particles in a box, where each particle perf
 
 Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN-Diffusion.html).
 
-<img src="images/diffusion.png" alt="Diffusion" width="400">
+<img src="images/diffusion.png" alt="Diffusion" width="600">
 
 ### Illustrations of central limit theorem
 
