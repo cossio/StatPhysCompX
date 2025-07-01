@@ -129,9 +129,20 @@ Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%2
 
 <img src="images/lennard-jones.svg" alt="Lennard-Jones potential" width="600">
 
-## Other resources in Julia:
+## Supplementary resources in Julia
 
-- Simulations of the 2D Ising model, using the more advanced cluster Wolff algorithm (which is very efficient at or below the critical temperature): https://github.com/cossio/IsingModels.jl.
+### Advanced simulations of the 2D Ising model
+
+Near the critical temperature, the 2D Ising model exhibits a phenomenon known as critical slowing down, where the correlation length diverges and the system becomes very slow to equilibrate under the standard Metropolis sampling algorithm that we saw in the previous. This makes it challenging to simulate. More advanced algorithms, such as cluster algorithms, can be used to efficiently simulate the 2D Ising model near the critical temperature. These algorithms work by updating clusters of spins simultaneously, instead of single spins, which allows for faster convergence and reduced autocorrelation times. The Wolff algorithm is an example of these cluster Monte Carlo methods.
+
+This repository contains a Julia implementation of the Wolff algorithm for the 2D Ising model, as well as other resources related to this model. The code is designed to be easy to use and modify, allowing you to explore different parameters and visualize the results. See: https://github.com/cossio/IsingModels.jl.
+
+- Typical clusters near the critical temperature: [link](https://cossio.github.io/IsingModels.jl/stable/literate/wolff/#Typical-Wolff-clusters-at-criticality).
+- The Wolff algorithm is very efficient near or below the critical temperature. But it becomes inefficient above the critical temperature because the typical clusters become very small. In this case, the Metropolis algorithm is more efficient. See: [link](https://cossio.github.io/IsingModels.jl/stable/literate/wolff/#Average-size-of-Wolff's-clusters-as-a-function-of-temperature).
+
+- Lars Onsager (Nobel Prize 1968) found an exact solution of the 2D Ising model in 1944, in a famous mathematical *tour de force*. We can compare the heat capacity in simulations with the exact expression, see [link](https://cossio.github.io/IsingModels.jl/stable/literate/wolff/#Heat-capacity-vs.-exact-expression). The heat capacity diverges at the critical temperature, which is a hallmark of the phase transition of the model.
+<img src="images/onsager_h.png" alt="Ising model 2D heat capacity" width="600">
+
 
 ## External resources:
 
