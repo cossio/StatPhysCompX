@@ -47,12 +47,21 @@ This will open a web browser with the Pluto interface. You can create a new note
 The following links point to Pluto notebooks. Clicking on a link will open a web page with a static version of the notebook. To run the notebook interactively in your computer and edit the code, you can click on the "Edit or run this notebook" button in the top right corner of the page. Then click the button where it says "Download this notebook" and save the file in your computer. Finally, open the notebook in Pluto to run it.
 
 ### Illustrations of the law of large numbers
-Illustrations of the law of large numbers: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN.html).
 
-![alt text](https://github.com/cossio/StatPhysCompX/blob/main/images/lln.png)
+The law of large numbers states that as the number of trials increases, the sample mean will converge to the expected value. This is a fundamental concept in probability and statistics.
+
+Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN.html).
+
+![Law of large numbers](https://github.com/cossio/StatPhysCompX/blob/main/images/lln.png)
 
 ### Diffusion in a box and the law of large numbers
-Diffusion in a box and the law of large numbers: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN-Diffusion.html).
+
+We simulate a system of independent particles in a box, where each particle performs a random walk. The notebook illustrates how the law of large numbers applies to the diffusion process.
+
+Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN-Diffusion.html).
+
+![Diffusion](https://github.com/cossio/StatPhysCompX/blob/main/images/diffusion.png)
+
 - Illustrations of the central limit theorem: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/CLT.html).
 - Monte-Carlo simulations of the 2D Ising model with the Metropolis algorithm: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Ising-Metropolis.html).
 - Monte-Carlo simulations of the conserved order-parameter Ising model, using the Kawasaki algorithm: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Kawasaki-COP.html).
