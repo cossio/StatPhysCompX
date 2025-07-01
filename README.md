@@ -154,7 +154,7 @@ RBMs are inspired by statistical physics, where they can be seen as a special ca
 
 The following repository contains a Julia implementation of RBMs: https://github.com/cossio/RestrictedBoltzmannMachines.jl.
 
-You can start by looking at this Google Colab notebook ([link](https://colab.research.google.com/drive/1PZP4gdBmSa-iIIrdvqIgMABoTI1cUodQ?usp=sharing)) that demonstrates how to use the RBM package to train a model on the MNIST dataset. The notebook provides a step-by-step guide to training an RBM, visualizing the learned features, and generating new samples from the model.
+You can start by looking at this Google Colab notebook ([link](https://colab.research.google.com/drive/1PZP4gdBmSa-iIIrdvqIgMABoTI1cUodQ?usp=sharing)) that demonstrates how to use the RBM package to train a model on the MNIST dataset of handrawn digits. The notebook provides a step-by-step guide to training an RBM, visualizing the learned features, and generating new samples from the model.
 
 ## External resources:
 
