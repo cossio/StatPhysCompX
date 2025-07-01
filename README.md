@@ -81,18 +81,27 @@ Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%2
 
 <img src="images/Ising.png" alt="Ising 2D model" width="600">
 
+### Conserved order parameter Ising model
 
-- Monte-Carlo simulations of the conserved order-parameter Ising model, using the Kawasaki algorithm: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Kawasaki-COP.html).
+The conserved order-parameter Ising model is a variant of the Ising model that includes a conserved quantity, such as magnetization. This model is used to study systems with conservation laws, such as spinodal decomposition in binary alloys.
+
+In this notebook, we simulate the conserved order-parameter Ising model using the Kawasaki algorithm, which is a Monte Carlo method that conserves the total magnetization. The notebook allows you to visualize the evolution of the system and observe the dynamics of the conserved order parameter.
+
+Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Kawasaki-COP.html).
+
+<img src="images/kawasaki.png" alt="Conserved order parameter Ising model" width="600">
+
+
 - XY model: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/XY.html).
 - Ideal Fermi gases of non-interacting fermions: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/quantum-gasses-fermi.html).
 - Bose-Einstein condensation: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/bose-einstein-condensation.html).
 - Simulation of a simple system of particles interacting via a **Lennard-Jones potential**: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/lennard-jones.html).
 
-Other resources in Julia:
+## Other resources in Julia:
 
 - Simulations of the 2D Ising model, using the more advanced cluster Wolff algorithm (which is very efficient at or below the critical temperature): https://github.com/cossio/IsingModels.jl.
 
-External resources:
+## External resources:
 
 - XY model: https://kjslag.github.io/XY/.
 - Various simulations from physics: https://phet.colorado.edu/en/simulations/filter?type=html.
