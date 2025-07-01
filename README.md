@@ -67,12 +67,21 @@ Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%2
 
 Whereas the law of large numbers states that the sample mean converges to the expected value, the central limit theorem gives a more precise description of how the sample mean fluctuates around this expected value as the number of trials increases. Specifically, it states that the sample mean exhibits Gaussian fluctuations around the expected value as the number of trials increases, regardless of the original distribution of the data.
 
-<img src="images/clt.png" alt="Central limit theorem" width="600">
-
 Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/CLT.html).
 
+<img src="images/clt.png" alt="Central limit theorem" width="600">
 
-- Monte-Carlo simulations of the 2D Ising model with the Metropolis algorithm: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Ising-Metropolis.html).
+### 2D Ising model
+
+The Ising model is a paradigmatic model in statistical physics that describes ferromagnetism in materials. It consists of a lattice of spins that can take values of +1 or -1, representing the magnetic moments of atoms. The interactions between neighboring spins lead to phase transitions and critical phenomena.
+
+In this notebook, we simulate the 2D Ising model using the Metropolis algorithm, which is a Monte Carlo method for simulating systems in thermal equilibrium. The notebook allows you to visualize the evolution of the system and observe the phase transition as the temperature changes.
+
+Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Ising-Metropolis.html).
+
+<img src="images/Ising.png" alt="Ising 2D model" width="600">
+
+
 - Monte-Carlo simulations of the conserved order-parameter Ising model, using the Kawasaki algorithm: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Kawasaki-COP.html).
 - XY model: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/XY.html).
 - Ideal Fermi gases of non-interacting fermions: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/quantum-gasses-fermi.html).
