@@ -109,8 +109,18 @@ Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%2
 
 <img src="images/fermi.png" alt="Ideal Fermi gas" width="600">
 
+### Bose-Einstein condensation
 
-- Bose-Einstein condensation: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/bose-einstein-condensation.html).
+Bose-Einstein condensation is a phenomenon that occurs in systems of bosons at low temperatures, where a large number of particles occupy the same quantum state. This leads to macroscopic quantum phenomena, such as superfluidity.
+
+In this notebook, we illustrate how to simulate the Bose-Einstein condensation of a system of bosons using a Monte-Carlo algorithm. The simulation allows us to visualize the occupation of the ground state as the temperature changes. We consider a system of non-interacting bosons in a box, where the particles can occupy discrete energy levels. But the Monte-Carlo routines can also be used to simulate more complex systems.
+
+Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/bose-einstein-condensation.html).
+
+<img src="images/bose.png" alt="Bose-Einstein condensation" width="600">
+
+
+
 - Simulation of a simple system of particles interacting via a **Lennard-Jones potential**: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/lennard-jones.html).
 
 ## Other resources in Julia:
