@@ -129,7 +129,7 @@ Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%2
 
 <img src="images/lennard-jones.svg" alt="Lennard-Jones potential" width="600">
 
-## Supplementary resources in Julia
+## Advanced resources
 
 ### Advanced simulations of the 2D Ising model
 
@@ -143,10 +143,18 @@ This repository contains a Julia implementation of the Wolff algorithm for the 2
 - The Wolff algorithm is very efficient near or below the critical temperature. But it becomes inefficient above the critical temperature because the typical clusters become very small. In this case, the Metropolis algorithm is more efficient. See: [link](https://cossio.github.io/IsingModels.jl/stable/literate/wolff/#Average-size-of-Wolff's-clusters-as-a-function-of-temperature).
 <img src="images/wolff_size.png" alt="Typical size of clusters" width="600">
 
-
 - Lars Onsager (Nobel Prize 1968) found an exact solution of the 2D Ising model in 1944, in a famous mathematical *tour de force*. We can compare the heat capacity in simulations with the exact expression, see [link](https://cossio.github.io/IsingModels.jl/stable/literate/wolff/#Heat-capacity-vs.-exact-expression). The heat capacity diverges at the critical temperature, which is a hallmark of the phase transition of the model.
 <img src="images/onsager_h.png" alt="Ising model 2D heat capacity" width="600">
 
+### Unsupervised learning with Restricted Boltzmann machines
+
+Restricted Boltzmann machines (RBM) are a type of generative model that can learn complex distributions from data. They are particularly useful for unsupervised learning tasks, such as dimensionality reduction and feature extraction. RBMs consist of two layers: a visible layer that represents the input data and a hidden layer that captures the underlying structure of the data.
+
+RBMs are inspired by statistical physics, where they can be seen as a special case of a Boltzmann distribution. In 2024 Geoffrey Hinton received the Nobel Prize in Physics for his work on RBMs and their applications to deep learning.
+
+The following repository contains a Julia implementation of RBMs: https://github.com/cossio/RestrictedBoltzmannMachines.jl.
+
+You can start by looking at this Google Colab notebook ([link](https://colab.research.google.com/drive/1PZP4gdBmSa-iIIrdvqIgMABoTI1cUodQ?usp=sharing)) that demonstrates how to use the RBM package to train a model on the MNIST dataset. The notebook provides a step-by-step guide to training an RBM, visualizing the learned features, and generating new samples from the model.
 
 ## External resources:
 
