@@ -50,7 +50,7 @@ The following links point to Pluto notebooks. Clicking on a link will open a web
 
 The law of large numbers states that as the number of trials increases, the sample mean will converge to the expected value. This is a fundamental concept in probability and statistics.
 
-Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN.html).
+**Notebook:** [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN.html).
 
 <img src="images/lln.png" alt="Law of large numbers" width="600">
 
@@ -59,7 +59,7 @@ Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%2
 
 We simulate a system of independent particles in a box, where each particle performs a random walk. The notebook illustrates how the law of large numbers applies to the diffusion process.
 
-Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN-Diffusion.html).
+**Notebook:** [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN-Diffusion.html).
 
 <img src="images/diffusion.png" alt="Diffusion" width="600">
 
@@ -67,7 +67,7 @@ Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%2
 
 Whereas the law of large numbers states that the sample mean converges to the expected value, the central limit theorem gives a more precise description of how the sample mean fluctuates around this expected value as the number of trials increases. Specifically, it states that the sample mean exhibits Gaussian fluctuations around the expected value as the number of trials increases, regardless of the original distribution of the data.
 
-Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/CLT.html).
+**Notebook:** [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/CLT.html).
 
 <img src="images/clt.png" alt="Central limit theorem" width="600">
 
@@ -77,7 +77,7 @@ The Ising model is a paradigmatic model in statistical physics that describes fe
 
 In this notebook, we simulate the 2D Ising model using the Metropolis algorithm, which is a Monte Carlo method for simulating systems in thermal equilibrium. The notebook allows you to visualize the evolution of the system and observe the phase transition as the temperature changes.
 
-Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Ising-Metropolis.html).
+**Notebook:** [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Ising-Metropolis.html).
 
 <img src="images/Ising.png" alt="Ising 2D model" width="600">
 
@@ -87,7 +87,7 @@ The conserved order-parameter Ising model is a variant of the Ising model that i
 
 In this notebook, we simulate the conserved order-parameter Ising model using the Kawasaki algorithm, which is a Monte Carlo method that conserves the total magnetization. The notebook allows you to visualize the evolution of the system and observe the dynamics of the conserved order parameter.
 
-Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Kawasaki-COP.html).
+**Notebook:** [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Kawasaki-COP.html).
 
 <img src="images/kawasaki.png" alt="Conserved order parameter Ising model" width="600">
 
@@ -97,7 +97,7 @@ The XY model is a statistical physics model that describes systems with continuo
 
 In this notebook, we simulate the XY model using the Metropolis algorithm.
 
-Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/XY.html).
+**Notebook:** [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/XY.html).
 
 <img src="images/xy.png" alt="XY model" width="600">
 
@@ -105,7 +105,7 @@ Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%2
 
 The ideal Fermi gas is a model that describes a system of non-interacting fermions, such as electrons in a metal. It is characterized by the Pauli exclusion principle, which states that no two fermions can occupy the same quantum state.
 
-Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/quantum-gasses-fermi.html).
+**Notebook:** [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/quantum-gasses-fermi.html).
 
 <img src="images/fermi.png" alt="Ideal Fermi gas" width="600">
 
@@ -115,7 +115,7 @@ Bose-Einstein condensation is a phenomenon that occurs in systems of bosons at l
 
 In this notebook, we illustrate how to simulate the Bose-Einstein condensation of a system of bosons using a Monte-Carlo algorithm. The simulation allows us to visualize the occupation of the ground state as the temperature changes. We consider a system of non-interacting bosons in a box, where the particles can occupy discrete energy levels. But the Monte-Carlo routines can also be used to simulate more complex systems.
 
-Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/bose-einstein-condensation.html).
+**Notebook:** [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/bose-einstein-condensation.html).
 
 <img src="images/bose.svg" alt="Bose-Einstein condensation" width="600">
 
@@ -125,7 +125,7 @@ The Lennard-Jones potential is a mathematical model that describes the interacti
 
 In this notebook, we simulate a simple system of particles interacting via the Lennard-Jones potential. We will calculate the radial distribution function and observe the system's different phases (solid, liquid, gas).
 
-Notebook: [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/lennard-jones.html).
+**Notebook:** [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/lennard-jones.html).
 
 <img src="images/lennard-jones.svg" alt="Lennard-Jones potential" width="600">
 
