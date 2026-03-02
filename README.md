@@ -4,7 +4,9 @@ This repository contains computational resources for the Statistical Physics cou
 
 For any questions or suggestions, please contact the author of this repository: [Jorge FERNANDEZ-DE-COSSIO-DIAZ](https://sites.google.com/view/jorgefdcd). Also feel free to open an issue in the repository or a send a pull request if you have any suggestions for improvements.
 
-## Setting up Julia and Pluto
+## Resources in Julia
+
+### Setting up Julia and Pluto
 
 The recommended way to install [Julia](https://julialang.org) is to use the `juliaup` installer. On Unix-type system (Linux, macOS) open a terminal and run the following command:
 
@@ -42,11 +44,11 @@ Pluto.run()
 
 This will open a web browser with the Pluto interface. You can create a new notebook by clicking on the "New notebook" button. You can also open an existing notebook by clicking on the "Open notebook" button and selecting the notebook file.
 
-## Notebooks
+### Pluto notebooks
 
 The following links point to Pluto notebooks. Clicking on a link will open a web page with a static version of the notebook. To run the notebook interactively in your computer and edit the code, you can click on the "Edit or run this notebook" button in the top right corner of the page. Then click the button where it says "Download this notebook" and save the file in your computer. Finally, open the notebook in Pluto to run it.
 
-### Illustrations of the law of large numbers
+#### Illustrations of the law of large numbers
 
 The law of large numbers states that as the number of trials increases, the sample mean will converge to the expected value. This is a fundamental concept in probability and statistics.
 
@@ -55,7 +57,7 @@ The law of large numbers states that as the number of trials increases, the samp
 <img src="images/lln.png" alt="Law of large numbers" width="600">
 
 
-### Diffusion in a box and the law of large numbers
+#### Diffusion in a box and the law of large numbers
 
 We simulate a system of independent particles in a box, where each particle performs a random walk. The notebook illustrates how the law of large numbers applies to the diffusion process.
 
@@ -63,7 +65,7 @@ We simulate a system of independent particles in a box, where each particle perf
 
 <img src="images/diffusion.png" alt="Diffusion" width="600">
 
-### Illustrations of central limit theorem
+#### Illustrations of central limit theorem
 
 Whereas the law of large numbers states that the sample mean converges to the expected value, the central limit theorem gives a more precise description of how the sample mean fluctuates around this expected value as the number of trials increases. Specifically, it states that the sample mean exhibits Gaussian fluctuations around the expected value as the number of trials increases, regardless of the original distribution of the data.
 
@@ -71,7 +73,7 @@ Whereas the law of large numbers states that the sample mean converges to the ex
 
 <img src="images/clt.png" alt="Central limit theorem" width="600">
 
-### 2D Ising model
+#### 2D Ising model
 
 The Ising model is a paradigmatic model in statistical physics that describes ferromagnetism in materials. It consists of a lattice of spins that can take values of +1 or -1, representing the magnetic moments of atoms. The interactions between neighboring spins lead to phase transitions and critical phenomena.
 
