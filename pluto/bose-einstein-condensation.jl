@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.13
+# v0.20.23
 
 using Markdown
 using InteractiveUtils
@@ -10,28 +10,50 @@ using Plots, Random
 
 # ╔═╡ 8a6b36c1-6330-422d-ba96-12939b5e3215
 md"""
-This notebook is part of the computational resources for the Statistical Physics course at École Polytechnique. To return to the main repository, follow this link: https://github.com/cossio/StatPhysCompX.
+# Bose-Einstein condensation
+
+This notebook is part of the computational resources for the Statistical Physics course at École Polytechnique. To return to the main repository, follow this link: [https://github.com/cossio/StatPhysCompX](https://github.com/cossio/StatPhysCompX).
 """
 
 # ╔═╡ f28e176b-d6d9-4706-9dbc-7a15351e28eb
 md"""
-In this notebook we will simulate an ideal Bose gas to observe Bose-Einstein Condensation (BEC). This is a cornerstone of quantum statistical mechanics and directly relates to topics like superfluidity mentioned in the course.
+In this notebook we simulate an ideal Bose gas to observe Bose-Einstein Condensation (BEC).
 
-Unlike classical particles, identical quantum particles are indistinguishable. For bosons (particles with integer spin), any number of them can occupy the same quantum state.
+Unlike classical particles, identical quantum particles are **indistinguishable**. For bosons (particles with integer spin), any number of them can occupy the same quantum state.
 
-- Bose-Einstein Statistics: At a given temperature, the particles distribute themselves among the available energy levels ($\epsilon_0,\epsilon_1,\epsilon_2,\dots$).
-- Bose-Einstein Condensation: Below a certain critical temperature ($T_c$), a macroscopic fraction of the entire system's particles suddenly drops into the lowest energy state (the ground state, $\epsilon_0$). This condensed portion of the gas has zero viscosity (it's a superfluid) and other exotic quantum properties.
+- **Bose-Einstein Statistics**: At a given temperature, the particles distribute themselves among the available energy levels ($\epsilon_0,\epsilon_1,\epsilon_2,\dots$).
+- **Bose-Einstein Condensation**: Below a certain critical temperature ($T_c$), a macroscopic fraction of the particles accumulates in the ground state ($\epsilon_0$).
 
-Instead of tracking individual particles, our simulation will track the occupation number ($n_i$) for each energy level $\epsilon_i$. We will use a Monte Carlo algorithm to find the most probable distribution $(n_0,n_1,n_2,\dots)$ at a given temperature.
+Instead of tracking individual particles, our simulation tracks the **occupation numbers** $(n_0, n_1, n_2, \dots)$, where $n_i$ is the number of particles in energy level $\epsilon_i$. The total number of particles is fixed: $\sum_i n_i = N$.
 """
 
 # ╔═╡ b58ed017-65d6-4916-9bde-748cf6e788f4
 md"""
-This script simulates non-interacting bosons in a simplified set of energy levels (e.g., those of a harmonic oscillator). It will:
-1. Initialize $N$ particles in $M$ energy levels.
-2. Use the Metropolis algorithm to move particles between levels until thermal equilibrium is reached.
-3. Plot the final distribution of particles over the energy levels.
-The code will clearly show the formation of a condensate at low temperatures.
+## Monte Carlo method and acceptance criterion
+
+We sample from the canonical ensemble at fixed $N$ and temperature $T$. The probability of a configuration $\{n_i\}$ depends on whether particles are **distinguishable** (classical / Maxwell-Boltzmann) or **indistinguishable** (bosons).
+
+### Indistinguishable bosons (Bose-Einstein)
+
+For indistinguishable bosons in non-degenerate energy levels, each set of occupation numbers corresponds to exactly **one** microstate. The canonical probability is simply:
+
+$$P_{\text{BE}}(\{n_i\}) \propto \exp\!\left(-\frac{1}{T}\sum_i n_i \epsilon_i\right)$$
+
+Our Monte Carlo move proposes to transfer one particle from a randomly chosen level $i$ to another randomly chosen level $j$. Since the proposal is **symmetric** (we pick $(i,j)$ and $(j,i)$ with equal probability), the Metropolis acceptance ratio is:
+
+$$a_{\text{BE}} = \min\!\left(1,\; e^{-\Delta E / T}\right) \quad \text{where } \Delta E = \epsilon_j - \epsilon_i$$
+
+### Distinguishable particles (Maxwell-Boltzmann)
+
+For distinguishable (classical) particles, the set of occupation numbers $\{n_i\}$ corresponds to $\frac{N!}{\prod_i n_i!}$ microstates (the multinomial coefficient counting which particle goes where). The canonical probability becomes:
+
+$$P_{\text{MB}}(\{n_i\}) \propto \frac{N!}{\prod_i n_i!} \exp\!\left(-\frac{1}{T}\sum_i n_i \epsilon_i\right)$$
+
+Moving one particle from level $i$ to level $j$ changes the multinomial factor by $n_i / (n_j + 1)$. With the same symmetric proposal, the acceptance ratio becomes:
+
+$$a_{\text{MB}} = \min\!\left(1,\; \frac{n_i}{n_j+1}\, e^{-\Delta E / T}\right)$$
+
+The extra factor $n_i/(n_j+1)$ penalizes moves that create very unequal occupations — distinguishable particles "prefer" to spread out (higher entropy from the multinomial). Bosons have no such penalty.
 """
 
 # ╔═╡ b171cc8e-d25c-4545-840a-c75f694bb767
@@ -41,90 +63,261 @@ const N = 1000        # Total number of particles (bosons)
 const M = 100         # Number of energy levels to consider
 
 # ╔═╡ 1dca8b1f-95eb-4264-9ebb-e48e36ad0118
-const n_steps = 200000000 # Number of Monte Carlo steps (needs more to equilibrate)
+const n_steps = 200_000_000 # Number of Monte Carlo steps
 
 # ╔═╡ 195bc054-4934-44ac-b760-1ad5723731e0
-# --- Energy Levels ---
-# We model the energy levels of a simple system, e.g., a harmonic oscillator.
-# The ground state has energy 0. We'll use E_i = i.
-const energies = [float(i) for i in 0:M-1]
-
-# ╔═╡ 30ffd662-aff9-42a9-a783-11d8e6ea8a19
-# --- Run the simulation and analyze the result ---
-
-# Try different temperatures:
-# T > T_c (e.g., 10.0) -> Classical-like distribution
-# T < T_c (e.g., 2.0)  -> Bose-Einstein Condensate forms
-T = 50.0         # Temperature (in units of energy/k_B)
+# Equally-spaced energy levels: ε_i = i  (in units of the level spacing)
+const energies = [Float64(i) for i in 0:M-1]
 
 # ╔═╡ 024389fd-aa1d-4539-954a-6bee678b42d6
-# --- Main Monte Carlo Loop (Metropolis Algorithm for Occupation Numbers) ---
-function run_simulation()
-    println("Simulating Ideal Bose Gas for T = $T...")
+"""
+Monte Carlo simulation sampling the Bose-Einstein canonical ensemble.
 
-	# --- Initialize Occupation Numbers ---
-	# Start with all N particles in the ground state (energy = 0)
-	occupation_numbers = zeros(Int, M)
-	occupation_numbers[1] = N
-	
+Acceptance criterion: min(1, exp(-dE/T)).
+No occupation-number prefactor, because for indistinguishable bosons
+each set of occupation numbers {n_i} is a single microstate.
+"""
+function run_bec_simulation(T)
+    occupation = zeros(Int, M)
+    occupation[1] = N  # start with all particles in the ground state (Julia is 1-indexed)
+
     for step in 1:n_steps
-        # 1. Pick two different energy levels at random to move a particle between
+        # Propose: move one particle from level i to level j
         i = rand(1:M)
         j = rand(1:M)
-        if i == j continue end
+        if i == j; continue; end
+        if occupation[i] == 0; continue; end
 
-        # 2. We can only move a particle FROM level i if it's not empty.
-        if occupation_numbers[i] > 0
-            # 3. Calculate the energy change for moving one particle from i to j
-            dE = energies[j] - energies[i]
+        dE = energies[j] - energies[i]
 
-			ni = occupation_numbers[i]
-            nj = occupation_numbers[j]
-            acceptance_ratio = exp(-dE / T) * (ni / (nj + 1))
-
-			if rand() < acceptance_ratio
-                occupation_numbers[i] -= 1
-                occupation_numbers[j] += 1
-            end
-        end
-
-        # Print progress
-        if step % (n_steps / 10) == 0
-            println("Step: $step/$n_steps")
+        # Metropolis acceptance: symmetric proposal → ratio is just the Boltzmann factor
+        if dE <= 0.0 || rand() < exp(-dE / T)
+            occupation[i] -= 1
+            occupation[j] += 1
         end
     end
-    println("Simulation finished.")
-    return occupation_numbers
+
+    return occupation
 end
 
-# ╔═╡ 5f583205-fb39-4196-b914-87af272f80f0
-# --- Function to plot the resulting distribution ---
-function plot_distribution(final_occupations)
-    # Calculate the fraction of particles in each state
-    occupation_fraction = final_occupations / N
+# ╔═╡ a1b2c3d4-1111-4000-8000-000000000001
+"""
+Monte Carlo simulation sampling the Maxwell-Boltzmann (classical) canonical ensemble.
 
-    bar(
-        energies, occupation_fraction,
-        xlabel="Energy Level (E)", ylabel="Occupation Fraction (nᵢ/N)",
-        title="Bose-Einstein Distribution at T = $T",
-        legend=false, linecolor=:auto
-    )
-    #savefig("bose_einstein_T_$(T).png")
-    #println("Distribution plot saved to bose_einstein_T_$(T).png")
+Acceptance criterion: min(1, (n_i / (n_j+1)) * exp(-dE/T)).
+The prefactor n_i/(n_j+1) accounts for the multinomial coefficient
+N! / prod(n_k!) that counts how many ways distinguishable particles
+can produce the same occupation numbers.
+"""
+function run_mb_simulation(T)
+    occupation = zeros(Int, M)
+    occupation[1] = N
+
+    for step in 1:n_steps
+        i = rand(1:M)
+        j = rand(1:M)
+        if i == j; continue; end
+        if occupation[i] == 0; continue; end
+
+        dE = energies[j] - energies[i]
+        ni = occupation[i]
+        nj = occupation[j]
+
+        # Classical acceptance: includes the multinomial ratio
+        acceptance_ratio = exp(-dE / T) * (ni / (nj + 1))
+        if rand() < acceptance_ratio
+            occupation[i] -= 1
+            occupation[j] += 1
+        end
+    end
+
+    return occupation
 end
+
+# ╔═╡ a1b2c3d4-2222-4000-8000-000000000002
+md"""
+## Non-degenerate levels: Bose-Einstein vs Maxwell-Boltzmann
+
+We first compare the two statistics on a simple system with $M = 100$ non-degenerate, equally-spaced energy levels $\epsilon_i = i$. We run the simulation at three temperatures.
+"""
+
+# ╔═╡ 30ffd662-aff9-42a9-a783-11d8e6ea8a19
+const temperatures = [2.0, 10.0, 50.0]
 
 # ╔═╡ 2756183a-4541-4a66-8348-783e37cfd98a
-final_distribution = run_simulation()
+begin
+    results_be = Dict{Float64, Vector{Int}}()
+    results_mb = Dict{Float64, Vector{Int}}()
+    for T in temperatures
+        println("T = $T: running BE...")
+        results_be[T] = run_bec_simulation(T)
+        println("T = $T: running MB...")
+        results_mb[T] = run_mb_simulation(T)
+        println("T = $T: done.")
+    end
+end
 
 # ╔═╡ 09cc2573-cf42-4666-925a-df6396691f44
-# --- Report on the condensate ---
-plot_distribution(final_distribution)
+begin
+    comparison_plots = []
+    for T in temperatures
+        p = bar(
+            energies .- 0.2, results_be[T] ./ N,
+            bar_width=0.4, alpha=0.8, label="Bose-Einstein",
+            xlabel="Energy level εᵢ", ylabel="nᵢ / N",
+            title="T = $T", xlim=(-1, 40)
+        )
+        bar!(p,
+            energies .+ 0.2, results_mb[T] ./ N,
+            bar_width=0.4, alpha=0.8, label="Maxwell-Boltzmann"
+        )
+        push!(comparison_plots, p)
+    end
+    plot(comparison_plots..., layout=(length(temperatures), 1),
+         size=(800, 300 * length(temperatures)))
+end
 
 # ╔═╡ 1c6bb2a1-6fba-43fb-bd30-7af951f0cbad
-ground_state_fraction = final_distribution[1] / N
+for T in temperatures
+    be_frac = results_be[T][1] / N
+    mb_frac = results_mb[T][1] / N
+    println("T = $T:  ground-state fraction  BE = $(round(be_frac, digits=3)),  MB = $(round(mb_frac, digits=3))")
+end
 
-# ╔═╡ b664246a-fea4-42b0-87c1-7e580348d528
-println("Fraction of particles in the ground state (E=0): $(round(ground_state_fraction * 100, digits=2))%")
+# ╔═╡ a1b2c3d4-3333-4000-8000-000000000003
+md"""
+At high temperature the two distributions are nearly identical (classical limit). At low temperature, the Bose-Einstein distribution concentrates more particles in the ground state than the Maxwell-Boltzmann distribution. This is because the multinomial factor $n_i/(n_j+1)$ in the classical case penalizes high occupation of any single level.
+
+However, with non-degenerate levels the crossover is smooth — there is no sharp phase transition. To see genuine Bose-Einstein **condensation** as a sharp transition, we need energy levels with increasing degeneracy, as occurs in higher-dimensional systems.
+
+To be a bit more precise,we need a sufficiently rapidly growing density of states / sufficiently large excited-state capacity behavior; degeneracy is one way that happens (e.g., 3D harmonic oscillator below), but not the only way, and non-degenerate spectra can still show macroscopic ground-state occupation depending on confinement and limit.
+"""
+
+# ╔═╡ a1b2c3d4-4444-4000-8000-000000000004
+md"""
+## 3D isotropic harmonic oscillator: genuine BEC
+
+For a 3D isotropic harmonic oscillator, the energy levels are $\epsilon_n = n\hbar\omega$ (we set $\hbar\omega = 1$), but now level $n$ has a **degeneracy**:
+
+$$g_n = \frac{(n+1)(n+2)}{2}$$
+
+which counts the number of ways to write $n = n_x + n_y + n_z$ with $n_x, n_y, n_z \geq 0$.
+
+We can still work with occupation numbers per energy level, $n_i$ = total number of particles with energy $\epsilon_i$. These $n_i$ particles are distributed among the $g_i$ degenerate sub-states of that level. For indistinguishable bosons, the number of ways to distribute $n_i$ bosons among $g_i$ sub-states is:
+
+$$\binom{n_i + g_i - 1}{n_i}$$
+
+The canonical probability of an occupation-number configuration $\{n_i\}$ is therefore:
+
+$$P(\{n_i\}) \propto \prod_i \binom{n_i + g_i - 1}{n_i} \, e^{-n_i \epsilon_i / T}$$
+
+Moving one particle from level $i$ to level $j$, the ratio of the binomial factors gives:
+
+$$\frac{\binom{n_i - 1 + g_i - 1}{n_i - 1}}{\binom{n_i + g_i - 1}{n_i}} = \frac{n_i}{n_i + g_i - 1}$$
+
+$$\frac{\binom{n_j + 1 + g_j - 1}{n_j + 1}}{\binom{n_j + g_j - 1}{n_j}} = \frac{n_j + g_j}{n_j + 1}$$
+
+The Metropolis acceptance ratio becomes:
+
+$$a = \min\!\left(1,\; \frac{n_i}{n_i + g_i - 1} \cdot \frac{n_j + g_j}{n_j + 1} \cdot e^{-\Delta E / T}\right)$$
+
+Note that for $g_i = 1$ (non-degenerate), the prefactor reduces to 1, recovering the simple Boltzmann acceptance. For large degeneracy, the factor $\frac{n_j + g_j}{n_j + 1} \gg 1$ for small $n_j$, which means the algorithm readily populates highly degenerate excited levels — this is what makes BEC a sharp transition.
+
+### Critical temperature
+
+For $N$ bosons in a 3D harmonic trap, the critical temperature is:
+
+$$T_c = \frac{\hbar\omega}{k_B}\left(\frac{N}{\zeta(3)}\right)^{1/3}$$
+
+In our units ($\hbar\omega / k_B = 1$) this gives $T_c = (N / \zeta(3))^{1/3}$.
+"""
+
+# ╔═╡ a1b2c3d4-5555-4000-8000-000000000005
+"""
+Monte Carlo simulation of bosons in a 3D harmonic oscillator.
+
+Energy levels have degeneracy g_i, which modifies the acceptance ratio
+via the binomial factor counting how many ways n_i bosons can occupy
+g_i sub-states.
+"""
+function run_bec_3d_simulation(T, degeneracies)
+    occupation = zeros(Int, M)
+    occupation[1] = N  # start condensed
+
+    for step in 1:n_steps
+        i = rand(1:M)
+        j = rand(1:M)
+        if i == j; continue; end
+        if occupation[i] == 0; continue; end
+
+        ni = occupation[i]
+        nj = occupation[j]
+        gi = degeneracies[i]
+        gj = degeneracies[j]
+        dE = energies[j] - energies[i]
+
+        # Acceptance ratio from the binomial degeneracy factors + Boltzmann weight
+        ratio = (ni / (ni + gi - 1.0)) * ((nj + gj) / (nj + 1.0)) * exp(-dE / T)
+
+        if rand() < ratio
+            occupation[i] -= 1
+            occupation[j] += 1
+        end
+    end
+
+    return occupation
+end
+
+# ╔═╡ a1b2c3d4-6666-4000-8000-000000000006
+# 3D harmonic oscillator: degeneracy of level n is (n+1)(n+2)/2
+const degeneracies = [div((n + 1) * (n + 2), 2) for n in 0:M-1]
+
+# ╔═╡ a1b2c3d4-7777-4000-8000-000000000007
+# ζ(3) ≈ 1.2020569031595942 (Apéry's constant)
+const ZETA_3 = 1.2020569031595942
+
+# ╔═╡ a1b2c3d4-8888-4000-8000-000000000008
+# Critical temperature for N bosons in a 3D harmonic trap
+const T_c = (N / ZETA_3)^(1/3)
+
+# ╔═╡ a1b2c3d4-9999-4000-8000-000000000009
+println("N = $N, predicted T_c = $(round(T_c, digits=2))")
+
+# ╔═╡ a1b2c3d4-aaaa-4000-8000-000000000010
+# Scan temperatures from well below to well above T_c
+begin
+    T_values = range(0.5, 2.0 * T_c, length=20)
+    condensate_fractions = Float64[]
+    for Tval in T_values
+        println("  T = $(round(Tval, digits=2)) (T/T_c = $(round(Tval/T_c, digits=2)))...")
+        occ = run_bec_3d_simulation(Tval, degeneracies)
+        push!(condensate_fractions, occ[1] / N)
+        println("  n_0/N = $(round(occ[1]/N, digits=3))")
+    end
+end
+
+# ╔═╡ a1b2c3d4-bbbb-4000-8000-000000000011
+begin
+    # Analytical prediction for the condensate fraction below T_c:
+    #   n_0/N = 1 - (T/T_c)^3   for T < T_c
+    #   n_0/N ~ 0                for T > T_c
+    T_theory = range(0.01, 2.0 * T_c, length=200)
+    n0_theory = [t < T_c ? 1 - (t / T_c)^3 : 0.0 for t in T_theory]
+
+    plot(T_theory ./ T_c, n0_theory,
+         linewidth=2, color=:black, label="Analytical: 1 - (T/Tᶜ)³",
+         xlabel="T / Tᶜ", ylabel="Condensate fraction n₀ / N",
+         title="Bose-Einstein condensation in a 3D harmonic trap",
+         xlim=(0, 2.1), ylim=(-0.05, 1.05), size=(700, 450))
+    scatter!(collect(T_values) ./ T_c, condensate_fractions,
+             color=:blue, markersize=5, label="MC simulation (N=$N)")
+    vline!([1.0], color=:gray, linestyle=:dash, linewidth=0.8, label="Tᶜ")
+end
+
+# ╔═╡ a1b2c3d4-cccc-4000-8000-000000000012
+md"""
+The simulation reproduces the expected behavior: below $T_c$, a macroscopic fraction of the particles condenses into the ground state. The analytical prediction $n_0/N = 1 - (T/T_c)^3$ (valid in the thermodynamic limit $N \to \infty$) is shown for reference. Finite-$N$ corrections smooth out the transition near $T_c$.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -140,9 +333,9 @@ Plots = "~1.40.14"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.5"
+julia_version = "1.12.5"
 manifest_format = "2.0"
-project_hash = "82b8b786141af7903c0a113770c89effe1c74331"
+project_hash = "70f6a354cd61a36e11effa40934d5dffa8b1af1d"
 
 [[deps.AliasTables]]
 deps = ["PtrArrays", "Random"]
@@ -232,7 +425,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.3.0+1"
 
 [[deps.ConcurrentUtilities]]
 deps = ["Serialization", "Sockets"]
@@ -281,7 +474,7 @@ version = "0.9.5"
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
-version = "1.6.0"
+version = "1.7.0"
 
 [[deps.EpollShim_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -433,6 +626,11 @@ git-tree-sha1 = "eac1206917768cb54957c65a615460d87b455fc1"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
 version = "3.1.1+0"
 
+[[deps.JuliaSyntaxHighlighting]]
+deps = ["StyledStrings"]
+uuid = "ac6e5ff7-fb65-4e79-a425-ec3bc9c03011"
+version = "1.12.0"
+
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "170b660facf5df5de098d866564877e119141cbd"
@@ -486,24 +684,24 @@ uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
 version = "0.6.4"
 
 [[deps.LibCURL_jll]]
-deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
+deps = ["Artifacts", "LibSSH2_jll", "Libdl", "OpenSSL_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "8.6.0+0"
+version = "8.15.0+0"
 
 [[deps.LibGit2]]
-deps = ["Base64", "LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
+deps = ["LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 version = "1.11.0"
 
 [[deps.LibGit2_jll]]
-deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll"]
+deps = ["Artifacts", "LibSSH2_jll", "Libdl", "OpenSSL_jll"]
 uuid = "e37daf67-58a4-590a-8e99-b0245dd2ffc5"
-version = "1.7.2+0"
+version = "1.9.0+0"
 
 [[deps.LibSSH2_jll]]
-deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
+deps = ["Artifacts", "Libdl", "OpenSSL_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
-version = "1.11.0+1"
+version = "1.11.3+1"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -548,7 +746,7 @@ version = "2.41.0+0"
 [[deps.LinearAlgebra]]
 deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-version = "1.11.0"
+version = "1.12.0"
 
 [[deps.LogExpFunctions]]
 deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
@@ -582,7 +780,7 @@ uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 version = "0.5.16"
 
 [[deps.Markdown]]
-deps = ["Base64"]
+deps = ["Base64", "JuliaSyntaxHighlighting", "StyledStrings"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 version = "1.11.0"
 
@@ -593,7 +791,8 @@ uuid = "739be429-bea8-5141-9913-cc70e7f3736d"
 version = "1.1.9"
 
 [[deps.MbedTLS_jll]]
-deps = ["Artifacts", "Libdl"]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "926c6af3a037c68d02596a44c22ec3595f5f760b"
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 version = "2.28.6+0"
 
@@ -614,7 +813,7 @@ version = "1.11.0"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2023.12.12"
+version = "2025.11.4"
 
 [[deps.NaNMath]]
 deps = ["OpenLibm_jll"]
@@ -624,7 +823,7 @@ version = "1.1.3"
 
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
-version = "1.2.0"
+version = "1.3.0"
 
 [[deps.Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -635,12 +834,12 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.27+1"
+version = "0.3.29+0"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
-version = "0.8.5+0"
+version = "0.8.7+0"
 
 [[deps.OpenSSL]]
 deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]
@@ -649,10 +848,9 @@ uuid = "4d8831e6-92b7-49fb-bdf8-b643e874388c"
 version = "1.5.0"
 
 [[deps.OpenSSL_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "9216a80ff3682833ac4b733caa8c00390620ba5d"
+deps = ["Artifacts", "Libdl"]
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.5.0+0"
+version = "3.5.4+0"
 
 [[deps.Opus_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -668,7 +866,7 @@ version = "1.8.1"
 [[deps.PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
-version = "10.42.0+1"
+version = "10.44.0+1"
 
 [[deps.Pango_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "FriBidi_jll", "Glib_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl"]
@@ -691,7 +889,7 @@ version = "0.44.2+0"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.11.0"
+version = "1.12.1"
 weakdeps = ["REPL"]
 
     [deps.Pkg.extensions]
@@ -776,7 +974,7 @@ uuid = "e99dba38-086e-5de3-a5b1-6e4c66e897c3"
 version = "6.8.2+1"
 
 [[deps.REPL]]
-deps = ["InteractiveUtils", "Markdown", "Sockets", "StyledStrings", "Unicode"]
+deps = ["InteractiveUtils", "JuliaSyntaxHighlighting", "Markdown", "Sockets", "StyledStrings", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 version = "1.11.0"
 
@@ -852,7 +1050,7 @@ version = "1.2.1"
 [[deps.SparseArrays]]
 deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-version = "1.11.0"
+version = "1.12.0"
 
 [[deps.StableRNGs]]
 deps = ["Random"]
@@ -889,7 +1087,7 @@ version = "1.11.0"
 [[deps.SuiteSparse_jll]]
 deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
-version = "7.7.0+0"
+version = "7.8.3+2"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -1131,7 +1329,7 @@ version = "1.6.0+0"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.2.13+1"
+version = "1.3.1+2"
 
 [[deps.Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1166,7 +1364,7 @@ version = "0.15.2+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.11.0+0"
+version = "5.15.0+0"
 
 [[deps.libdecor_jll]]
 deps = ["Artifacts", "Dbus_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pango_jll", "Wayland_jll", "xkbcommon_jll"]
@@ -1213,12 +1411,12 @@ version = "1.1.7+0"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.59.0+0"
+version = "1.64.0+1"
 
 [[deps.p7zip_jll]]
-deps = ["Artifacts", "Libdl"]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
-version = "17.4.0+2"
+version = "17.7.0+0"
 
 [[deps.x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1244,16 +1442,26 @@ version = "1.9.2+0"
 # ╟─f28e176b-d6d9-4706-9dbc-7a15351e28eb
 # ╟─b58ed017-65d6-4916-9bde-748cf6e788f4
 # ╠═ce2ee93a-1cb0-4c49-9247-5ac1401cdcee
-# ╠═024389fd-aa1d-4539-954a-6bee678b42d6
-# ╠═5f583205-fb39-4196-b914-87af272f80f0
 # ╠═b171cc8e-d25c-4545-840a-c75f694bb767
 # ╠═6e95d8ea-81d2-4858-b54c-8595f3f8c226
 # ╠═1dca8b1f-95eb-4264-9ebb-e48e36ad0118
 # ╠═195bc054-4934-44ac-b760-1ad5723731e0
+# ╠═024389fd-aa1d-4539-954a-6bee678b42d6
+# ╠═a1b2c3d4-1111-4000-8000-000000000001
+# ╟─a1b2c3d4-2222-4000-8000-000000000002
 # ╠═30ffd662-aff9-42a9-a783-11d8e6ea8a19
 # ╠═2756183a-4541-4a66-8348-783e37cfd98a
 # ╠═09cc2573-cf42-4666-925a-df6396691f44
 # ╠═1c6bb2a1-6fba-43fb-bd30-7af951f0cbad
-# ╠═b664246a-fea4-42b0-87c1-7e580348d528
+# ╟─a1b2c3d4-3333-4000-8000-000000000003
+# ╟─a1b2c3d4-4444-4000-8000-000000000004
+# ╠═a1b2c3d4-5555-4000-8000-000000000005
+# ╠═a1b2c3d4-6666-4000-8000-000000000006
+# ╠═a1b2c3d4-7777-4000-8000-000000000007
+# ╠═a1b2c3d4-8888-4000-8000-000000000008
+# ╠═a1b2c3d4-9999-4000-8000-000000000009
+# ╠═a1b2c3d4-aaaa-4000-8000-000000000010
+# ╠═a1b2c3d4-bbbb-4000-8000-000000000011
+# ╟─a1b2c3d4-cccc-4000-8000-000000000012
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
