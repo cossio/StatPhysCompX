@@ -4,13 +4,19 @@ This repository contains computational resources for the Statistical Physics cou
 
 For any questions or suggestions, please contact the author of this repository: [Jorge FERNANDEZ-DE-COSSIO-DIAZ](https://sites.google.com/view/jorgefdcd). Also feel free to open an issue in the repository or a send a pull request if you have any suggestions for improvements.
 
-## Resources in Python
+## Setup
 
+### Setting up Python for the Jupyter notebooks
 
+We recommend using `uv` to setup a Python environment to run the notebooks here. You can find installation instructions [at this link](https://docs.astral.sh/uv/getting-started/installation/#standalone-installer). Once you have `uv` installed, navigate to a local folder where you have downloaded this repository. Then run the following command to install the necessary Python dependencies:
 
-## Resources in Julia
+```bash
+uv sync 
+```
 
-### Setting up Julia and Pluto
+You can then open the Jupyter notebooks. We recommend using [VS Code](https://code.visualstudio.com) with the Python and Jupyter extensions, which allows you to run Jupyter notebooks directly in VS Code. You can also use other tools, such as Jupyter Lab or Jupyter Notebook, to open the notebooks. Be sure to select the Jupyter kernel associated with the `uv` environment where you installed the dependencies.
+
+### Setting up Julia for the Pluto notebooks
 
 The recommended way to install [Julia](https://julialang.org) is to use the `juliaup` installer. On Unix-type system (Linux, macOS) open a terminal and run the following command:
 
@@ -56,7 +62,9 @@ The following links point to Pluto notebooks. Clicking on a link will open a web
 
 The law of large numbers states that as the number of trials increases, the sample mean will converge to the expected value. This is a fundamental concept in probability and statistics.
 
-**Notebook:** [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN.html).
+- [Jupyter notebook link (in Python)](https://github.com/cossio/StatPhysCompX/blob/main/python-jupyter/LLN.ipynb).
+
+- [Pluto notebook link (in Julia)](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/LLN.html).
 
 <img src="images/lln.png" alt="Law of large numbers" width="600">
 
@@ -121,7 +129,7 @@ Bose-Einstein condensation is a phenomenon that occurs in systems of bosons at l
 
 In this notebook, we illustrate how to simulate the Bose-Einstein condensation of a system of bosons using a Monte-Carlo algorithm. The simulation allows us to visualize the occupation of the ground state as the temperature changes. We consider a system of non-interacting bosons in a box, where the particles can occupy discrete energy levels. But the Monte-Carlo routines can also be used to simulate more complex systems.
 
-[Notebook link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/bose-einstein-condensation.html).
+[Pluto notebook link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/bose-einstein-condensation.html).
 
 <img src="images/bose.svg" alt="Bose-Einstein condensation" width="600">
 
