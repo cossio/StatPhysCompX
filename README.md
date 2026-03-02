@@ -83,7 +83,7 @@ In this notebook, we simulate the 2D Ising model using the Metropolis algorithm,
 
 <img src="images/Ising.png" alt="Ising 2D model" width="600">
 
-### Conserved order parameter Ising model
+#### Conserved order parameter Ising model
 
 The conserved order-parameter Ising model is a variant of the Ising model that includes a conserved quantity, such as magnetization. This model is used to study systems with conservation laws, such as spinodal decomposition in binary alloys.
 
@@ -93,7 +93,7 @@ In this notebook, we simulate the conserved order-parameter Ising model using th
 
 <img src="images/kawasaki.png" alt="Conserved order parameter Ising model" width="600">
 
-### XY model
+#### XY model
 
 The XY model is a statistical physics model that describes systems with continuous symmetry, such as superfluid helium or liquid crystals. It consists of a lattice of spins that can take any value on a circle, representing the orientation of the spins.
 
@@ -103,7 +103,7 @@ In this notebook, we simulate the XY model using the Metropolis algorithm.
 
 <img src="images/xy.png" alt="XY model" width="600">
 
-### Ideal Fermi gases of non-interacting fermions
+#### Ideal Fermi gases of non-interacting fermions
 
 The ideal Fermi gas is a model that describes a system of non-interacting fermions, such as electrons in a metal. It is characterized by the Pauli exclusion principle, which states that no two fermions can occupy the same quantum state.
 
@@ -111,13 +111,13 @@ The ideal Fermi gas is a model that describes a system of non-interacting fermio
 
 <img src="images/fermi.png" alt="Ideal Fermi gas" width="600">
 
-### Bose-Einstein condensation
+#### Bose-Einstein condensation
 
 Bose-Einstein condensation is a phenomenon that occurs in systems of bosons at low temperatures, where a large number of particles occupy the same quantum state. This leads to macroscopic quantum phenomena, such as superfluidity.
 
 In this notebook, we illustrate how to simulate the Bose-Einstein condensation of a system of bosons using a Monte-Carlo algorithm. The simulation allows us to visualize the occupation of the ground state as the temperature changes. We consider a system of non-interacting bosons in a box, where the particles can occupy discrete energy levels. But the Monte-Carlo routines can also be used to simulate more complex systems.
 
-**Notebook:** [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/bose-einstein-condensation.html).
+[Notebook link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/bose-einstein-condensation.html).
 
 <img src="images/bose.svg" alt="Bose-Einstein condensation" width="600">
 
