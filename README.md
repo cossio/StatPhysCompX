@@ -136,7 +136,7 @@ In this notebook, we illustrate how to simulate the Bose-Einstein condensation o
 - [Jupyter notebook link (in Python)](https://github.com/cossio/StatPhysCompX/blob/main/python-jupyter/bose-einstein-condensation.ipynb).
 - [Pluto notebook link (in Julia)](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/bose-einstein-condensation.html).
 
-<img src="images/bose.svg" alt="Bose-Einstein condensation" width="600">
+<img src="images/bose.png" alt="Bose-Einstein condensation" width="600">
 
 ### Particles in a Lennard-Jones potential
 
