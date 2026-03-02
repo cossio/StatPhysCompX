@@ -91,6 +91,7 @@ The Ising model is a paradigmatic model in statistical physics that describes fe
 
 In this notebook, we simulate the 2D Ising model using the Metropolis algorithm, which is a Monte Carlo method for simulating systems in thermal equilibrium. The notebook allows you to visualize the evolution of the system and observe the phase transition as the temperature changes.
 
+- [Jupyter notebook link (in Python)](https://github.com/cossio/StatPhysCompX/blob/main/python-jupyter/Ising-Metropolis.ipynb).
 - [Pluto notebook link (in Julia)](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Ising-Metropolis.html).
 
 <img src="images/Ising.png" alt="Ising 2D model" width="600">
@@ -101,6 +102,7 @@ The conserved order-parameter Ising model is a variant of the Ising model that i
 
 In this notebook, we simulate the conserved order-parameter Ising model using the Kawasaki algorithm, which is a Monte Carlo method that conserves the total magnetization. The notebook allows you to visualize the evolution of the system and observe the dynamics of the conserved order parameter.
 
+- [Jupyter notebook link (in Python)](https://github.com/cossio/StatPhysCompX/blob/main/python-jupyter/Kawasaki-COP.ipynb).
 - [Pluto notebook link (in Julia)](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Kawasaki-COP.html).
 
 <img src="images/kawasaki.png" alt="Conserved order parameter Ising model" width="600">
@@ -111,6 +113,7 @@ The XY model is a statistical physics model that describes systems with continuo
 
 In this notebook, we simulate the XY model using the Metropolis algorithm.
 
+- [Jupyter notebook link (in Python)](https://github.com/cossio/StatPhysCompX/blob/main/python-jupyter/XY.ipynb).
 - [Pluto notebook link (in Julia)](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/XY.html).
 
 <img src="images/xy.png" alt="XY model" width="600">
@@ -130,6 +133,7 @@ Bose-Einstein condensation is a phenomenon that occurs in systems of bosons at l
 
 In this notebook, we illustrate how to simulate the Bose-Einstein condensation of a system of bosons using a Monte-Carlo algorithm. The simulation allows us to visualize the occupation of the ground state as the temperature changes. We consider a system of non-interacting bosons in a box, where the particles can occupy discrete energy levels. But the Monte-Carlo routines can also be used to simulate more complex systems.
 
+- [Jupyter notebook link (in Python)](https://github.com/cossio/StatPhysCompX/blob/main/python-jupyter/bose-einstein-condensation.ipynb).
 - [Pluto notebook link (in Julia)](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/bose-einstein-condensation.html).
 
 <img src="images/bose.svg" alt="Bose-Einstein condensation" width="600">
@@ -140,6 +144,7 @@ The Lennard-Jones potential is a mathematical model that describes the interacti
 
 In this notebook, we simulate a simple system of particles interacting via the Lennard-Jones potential. We will calculate the radial distribution function and observe the system's different phases (solid, liquid, gas).
 
+- [Jupyter notebook link (in Python)](https://github.com/cossio/StatPhysCompX/blob/main/python-jupyter/lennard-jones.ipynb).
 - [Pluto notebook link (in Julia)](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/lennard-jones.html).
 
 <img src="images/lennard-jones.svg" alt="Lennard-Jones potential" width="600">
