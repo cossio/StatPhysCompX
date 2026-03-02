@@ -4,6 +4,10 @@ This repository contains computational resources for the Statistical Physics cou
 
 For any questions or suggestions, please contact the author of this repository: [Jorge FERNANDEZ-DE-COSSIO-DIAZ](https://sites.google.com/view/jorgefdcd). Also feel free to open an issue in the repository or a send a pull request if you have any suggestions for improvements.
 
+## Resources in Python
+
+
+
 ## Resources in Julia
 
 ### Setting up Julia and Pluto
