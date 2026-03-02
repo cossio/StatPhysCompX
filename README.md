@@ -127,7 +127,7 @@ The Lennard-Jones potential is a mathematical model that describes the interacti
 
 In this notebook, we simulate a simple system of particles interacting via the Lennard-Jones potential. We will calculate the radial distribution function and observe the system's different phases (solid, liquid, gas).
 
-**Notebook:** [link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/lennard-jones.html).
+[Notebook link](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/lennard-jones.html).
 
 <img src="images/lennard-jones.svg" alt="Lennard-Jones potential" width="600">
 
