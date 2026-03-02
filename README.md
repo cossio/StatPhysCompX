@@ -118,7 +118,7 @@ In this notebook, we simulate the XY model using the Metropolis algorithm.
 
 The ideal Fermi gas is a model that describes a system of non-interacting fermions, such as electrons in a metal. It is characterized by the Pauli exclusion principle, which states that no two fermions can occupy the same quantum state.
 
-[lPluto notebook link (in Julia)k](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/quantum-gasses-fermi.html).
+[Pluto notebook link (in Julia)](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/quantum-gasses-fermi.html).
 
 <img src="images/fermi.png" alt="Ideal Fermi gas" width="600">
 
