@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.8
+# v0.20.23
 
 using Markdown
 using InteractiveUtils
@@ -10,11 +10,11 @@ using Statistics: mean, std
 # ╔═╡ a1b2c3d4-1111-4000-a000-000000000002
 using Random: randexp
 
+# ╔═╡ a1b2c3d4-1111-4000-a000-000000000021
+using Random: bitrand
+
 # ╔═╡ a1b2c3d4-1111-4000-a000-000000000003
 using ProgressLogging: @progress
-
-# ╔═╡ a1b2c3d4-1111-4000-a000-000000000004
-import Makie, CairoMakie
 
 # ╔═╡ a1b2c3d4-1111-4000-a000-000000000010
 md"""
@@ -98,6 +98,9 @@ For our model, flipping $\sigma_i \to -\sigma_i$ gives:
 so the flip is always accepted when $h\sigma_i < 0$ (the spin aligns with the field), and accepted with probability $e^{-2h\sigma_i}$ otherwise.
 """
 
+# ╔═╡ a1b2c3d4-1111-4000-a000-000000000004
+import Makie, CairoMakie
+
 # ╔═╡ a1b2c3d4-1111-4000-a000-000000000020
 function metropolis(; h::Real, N::Int, steps_between_frames::Int, number_of_frames::Int)
 	σ = bitrand(N)
@@ -116,9 +119,6 @@ function metropolis(; h::Real, N::Int, steps_between_frames::Int, number_of_fram
 	end
 	return mag
 end
-
-# ╔═╡ a1b2c3d4-1111-4000-a000-000000000021
-using Random: bitrand
 
 # ╔═╡ a1b2c3d4-1111-4000-a000-000000000030
 md"""
