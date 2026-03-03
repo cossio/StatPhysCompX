@@ -85,6 +85,13 @@ We simulate a system of independent particles in a box, where each particle perf
 
 <img src="images/diffusion.png" alt="Diffusion" width="600">
 
+### Metropolis algorithm for sampling from independent spins
+
+To illustrate how the Monte-Carlo Metropolis algorithm works, we simulate a system of independent spins, where each spin can take values of +1 or -1. The spins are subject to a uniform external field $h$. The notebook shows how to use the Metropolis algorithm to sample from the distribution of the spins and visualize the results.
+
+- [Jupyter notebook link (in Python)](https://github.com/cossio/StatPhysCompX/blob/main/python-jupyter/Ising-independent-spins.ipynb).
+- [Pluto notebook link (in Julia)](https://filedn.eu/lr2Qp84TxLASgn3j93EDkAJ/StatPhysCompX/Pluto%20static%20HTML/Ising-independent-spins.html).
+
 ### 2D Ising model
 
 The Ising model is a paradigmatic model in statistical physics that describes ferromagnetism in materials. It consists of a lattice of spins that can take values of +1 or -1, representing the magnetic moments of atoms. The interactions between neighboring spins lead to phase transitions and critical phenomena.
